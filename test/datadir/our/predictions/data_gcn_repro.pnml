@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="net1" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <page id="n0">
+      <place id="p3">
+        <name>
+          <text>p3</text>
+        </name>
+      </place>
+      <place id="p1">
+        <name>
+          <text>p1</text>
+        </name>
+      </place>
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="p0">
+        <name>
+          <text>p0</text>
+        </name>
+      </place>
+      <place id="p2">
+        <name>
+          <text>p2</text>
+        </name>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <transition id="B">
+        <name>
+          <text>B</text>
+        </name>
+      </transition>
+      <transition id="C">
+        <name>
+          <text>C</text>
+        </name>
+      </transition>
+      <transition id="A">
+        <name>
+          <text>A</text>
+        </name>
+      </transition>
+      <transition id="&gt;">
+        <name>
+          <text>&gt;</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="43573fd1-5cae-426a-8689-3e6a69835844"/>
+      </transition>
+      <transition id="|">
+        <name>
+          <text>|</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="c893615c-2064-4769-b3ef-875aeba695db"/>
+      </transition>
+      <arc id="6132608544" source="&gt;" target="p0"/>
+      <arc id="6135470592" source="A" target="p1"/>
+      <arc id="6135469152" source="p1" target="C"/>
+      <arc id="6135469728" source="C" target="p2"/>
+      <arc id="6135468864" source="p2" target="|"/>
+      <arc id="6135469248" source="B" target="p3"/>
+      <arc id="6135469344" source="p3" target="|"/>
+      <arc id="13122526368" source="|" target="sink"/>
+      <arc id="6135468624" source="p0" target="A"/>
+      <arc id="6135471600" source="p1" target="B"/>
+      <arc id="6135469584" source="B" target="p2"/>
+      <arc id="6135469680" source="source" target="&gt;"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="net1" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <page id="n0">
+      <place id="p1">
+        <name>
+          <text>p1</text>
+        </name>
+      </place>
+      <place id="p2">
+        <name>
+          <text>p2</text>
+        </name>
+      </place>
+      <place id="p0">
+        <name>
+          <text>p0</text>
+        </name>
+      </place>
+      <place id="p4">
+        <name>
+          <text>p4</text>
+        </name>
+      </place>
+      <place id="p3">
+        <name>
+          <text>p3</text>
+        </name>
+      </place>
+      <place id="p5">
+        <name>
+          <text>p5</text>
+        </name>
+      </place>
+      <place id="p6">
+        <name>
+          <text>p6</text>
+        </name>
+      </place>
+      <place id="p7">
+        <name>
+          <text>p7</text>
+        </name>
+      </place>
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <transition id="A_ACCEPTED">
+        <name>
+          <text>A_ACCEPTED</text>
+        </name>
+      </transition>
+      <transition id="A_FINALIZED">
+        <name>
+          <text>A_FINALIZED</text>
+        </name>
+      </transition>
+      <transition id="A_APPROVED">
+        <name>
+          <text>A_APPROVED</text>
+        </name>
+      </transition>
+      <transition id="A_ACTIVATED">
+        <name>
+          <text>A_ACTIVATED</text>
+        </name>
+      </transition>
+      <transition id="&gt;">
+        <name>
+          <text>&gt;</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="d28b9f60-b49c-4f49-84af-0499670eb441"/>
+      </transition>
+      <transition id="A_PARTLYSUBMITTED">
+        <name>
+          <text>A_PARTLYSUBMITTED</text>
+        </name>
+      </transition>
+      <transition id="A_SUBMITTED">
+        <name>
+          <text>A_SUBMITTED</text>
+        </name>
+      </transition>
+      <transition id="|">
+        <name>
+          <text>|</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="5f0a9890-a8d6-47e4-a059-536806a57faa"/>
+      </transition>
+      <transition id="A_PREACCEPTED">
+        <name>
+          <text>A_PREACCEPTED</text>
+        </name>
+      </transition>
+      <transition id="A_REGISTERED">
+        <name>
+          <text>A_REGISTERED</text>
+        </name>
+      </transition>
+      <arc id="13361335168" source="p0" target="A_SUBMITTED"/>
+      <arc id="13361334976" source="p1" target="A_PARTLYSUBMITTED"/>
+      <arc id="13361335360" source="A_ACCEPTED" target="p4"/>
+      <arc id="13361335456" source="p4" target="A_FINALIZED"/>
+      <arc id="13164792320" source="A_FINALIZED" target="p5"/>
+      <arc id="13361277056" source="p5" target="A_APPROVED"/>
+      <arc id="13188283936" source="A_APPROVED" target="p6"/>
+      <arc id="13188284032" source="p6" target="A_ACTIVATED"/>
+      <arc id="13188283744" source="A_APPROVED" target="p7"/>
+      <arc id="13188284224" source="p7" target="A_REGISTERED"/>
+      <arc id="13361334640" source="&gt;" target="p0"/>
+      <arc id="13361333392" source="A_PARTLYSUBMITTED" target="p2"/>
+      <arc id="13361335504" source="A_SUBMITTED" target="p1"/>
+      <arc id="13361333872" source="p2" target="A_PREACCEPTED"/>
+      <arc id="13361335312" source="A_PREACCEPTED" target="p3"/>
+      <arc id="13361332720" source="p3" target="A_ACCEPTED"/>
+      <arc id="13188283312" source="source" target="&gt;"/>
+      <arc id="13188283888" source="|" target="sink"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

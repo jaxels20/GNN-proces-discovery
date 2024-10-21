@@ -1,0 +1,85 @@
+{
+  "L": {
+    "fitness": 0.9,
+    "fitness_alignments": 0.75,
+    "fitness_alignments_percFitTraces": 50.0,
+    "fitness_entropy_exact": null,
+    "fitness_entropy_partial": null,
+    "fitness_percFitTraces": 50.0,
+    "fscore": 0.9473684210526316,
+    "fscore_alignments": 0.8571428571428571,
+    "fscore_entropy_exact": null,
+    "fscore_entropy_partial": null,
+    "generalization": 0.3757359312880715,
+    "metricsAverageWeight": 0.7804724443604795,
+    "precision": 1.0,
+    "precision_alignments": 1.0,
+    "precision_entropy_exact": null,
+    "precision_entropy_partial": null,
+    "simplicity": 0.8461538461538463
+  },
+  "L_17": {
+    "fitness": 0.9,
+    "fitness_alignments": 0.75,
+    "fitness_alignments_percFitTraces": 50.0,
+    "fitness_entropy_exact": null,
+    "fitness_entropy_partial": null,
+    "fitness_percFitTraces": 50.0,
+    "fscore": 0.9473684210526316,
+    "fscore_alignments": 0.8571428571428571,
+    "fscore_entropy_exact": null,
+    "fscore_entropy_partial": null,
+    "generalization": 0.3757359312880715,
+    "metricsAverageWeight": 0.7804724443604795,
+    "precision": 1.0,
+    "precision_alignments": 1.0,
+    "precision_entropy_exact": null,
+    "precision_entropy_partial": null,
+    "simplicity": 0.8461538461538463
+  },
+  "args": {
+    "beam_length": 5,
+    "beam_width": -5,
+    "config": "config.json",
+    "conformanceChecking": true,
+    "dataDirectory": "datadir/our/",
+    "embedding_size": null,
+    "embedding_strategy": null,
+    "exclude_frequency": false,
+    "export": "repro",
+    "import_petrinet": null,
+    "length_normalization": 0,
+    "logFilename": "data",
+    "miner": "gnn",
+    "model_filename": "./project/ml_models/models/model_candidates_frequency_new_036.pth",
+    "number_of_petrinets": 1,
+    "prom": false,
+    "timeout": null,
+    "top_x_traces": 17,
+    "visualize": false
+  },
+  "easy_soundness": true,
+  "log_filename": "datadir/our/data",
+  "petrinet_filename": "datadir/our/predictions/data_gcn_repro",
+  "sound": false,
+  "soundness_info": {
+    "s_components": [
+      [
+        "p2",
+        "B",
+        "sink",
+        "|",
+        "C",
+        "short_circuited_transition",
+        "p0",
+        ">",
+        "A",
+        "p1",
+        "source"
+      ]
+    ],
+    "uncovered_places_s_component": [
+      "p3"
+    ]
+  }
+}

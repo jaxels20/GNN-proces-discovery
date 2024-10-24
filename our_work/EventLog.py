@@ -1,6 +1,7 @@
 import lxml.etree as ET
 import pm4py
 from pm4py.objects.log.obj import EventLog as PM4PyEventLog, Trace as PM4PyTrace, Event as PM4PyEvent
+from collections import defaultdict
 
 class Event:
     """
@@ -139,6 +140,46 @@ class EventLog:
 
         return eventlog
 
+    @staticmethod
+    def from_pm4py(pm4py_eventlog):
+        """
+        Convert a PM4Py event log to the custom event log.
+
+        Parameters:
+        -----------
+        pm4py_eventlog : pm4py.objects.log.log.EventLog
+            The PM4Py event log to convert.
+
+        Returns:
+        --------
+        EventLog
+            The custom event log.
+        """
+        eventlog = EventLog()  # Create an empty custom event log
+
+        # Iterate through each trace in the PM4Py event log
+        for pm4py_trace in pm4py_eventlog:
+            trace_id = pm4py_trace.attributes.get("concept:name", "")
+            trace_attributes = dict(pm4py_trace.attributes)
+
+            # Create a new custom Trace object
+            trace = Trace(trace_id, trace_attributes)
+
+            # Iterate through each event in the PM4Py trace
+            for pm4py_event in pm4py_trace:
+                activity = pm4py_event.get("concept:name", "")
+                timestamp = pm4py_event.get("time:timestamp", "")
+                event_attributes = {k: v for k, v in pm4py_event.items() if k not in ["concept:name", "time:timestamp"]}
+
+                # Create a new custom Event object
+                event = Event(activity, timestamp, event_attributes)
+                trace.add_event(event)
+
+            # Add the trace to the custom event log
+            eventlog.traces.append(trace)
+
+        return eventlog
+
     def to_xes(self, xes_file: str):
         """
         Save the event log to an XES file.
@@ -257,43 +298,43 @@ class EventLog:
 
         return pm4py_event_log
 
-    @staticmethod
-    def from_pm4py(pm4py_eventlog):
+    def get_footprint_matrix(self):
         """
-        Convert a PM4Py event log to the custom event log.
-
-        Parameters:
-        -----------
-        pm4py_eventlog : pm4py.objects.log.log.EventLog
-            The PM4Py event log to convert.
+        Calculate the footprint matrix for the event log and return it in the form:
+        {('(A, B)': '>'), ('(A, C)': '#'), ...}
 
         Returns:
         --------
-        EventLog
-            The custom event log.
+        dict:
+            A dictionary where keys are tuples representing pairs of activities ('A', 'B')
+            and values are the relations ('>', '<', '||', '#').
         """
-        eventlog = EventLog()  # Create an empty custom event log
+        # Step 1: Initialize a defaultdict for direct succession relationships
+        direct_succession = defaultdict(set)
+        all_activities = self.get_all_activities()
 
-        # Iterate through each trace in the PM4Py event log
-        for pm4py_trace in pm4py_eventlog:
-            trace_id = pm4py_trace.attributes.get("concept:name", "")
-            trace_attributes = dict(pm4py_trace.attributes)
+        # Step 2: Collect all direct succession relationships from the traces
+        for trace in self.traces:
+            for i in range(len(trace.events) - 1):
+                current_activity = trace.events[i].activity
+                next_activity = trace.events[i + 1].activity
+                direct_succession[current_activity].add(next_activity)
 
-            # Create a new custom Trace object
-            trace = Trace(trace_id, trace_attributes)
+        # Step 3: Initialize the footprint matrix as a dictionary of tuples
+        footprint_matrix = {}
 
-            # Iterate through each event in the PM4Py trace
-            for pm4py_event in pm4py_trace:
-                activity = pm4py_event.get("concept:name", "")
-                timestamp = pm4py_event.get("time:timestamp", "")
-                event_attributes = {k: v for k, v in pm4py_event.items() if k not in ["concept:name", "time:timestamp"]}
+        # Step 4: Fill the footprint matrix based on direct succession and reverse relations
+        for activity_a in all_activities:
+            for activity_b in all_activities:
+                pair_key = f"({activity_a}, {activity_b})"
+                if activity_b in direct_succession[activity_a]:
+                    if activity_a in direct_succession[activity_b]:
+                        footprint_matrix[pair_key] = '||'  # Parallel relation
+                    else:
+                        footprint_matrix[pair_key] = '>'  # A → B (causal relation)
+                elif activity_a in direct_succession[activity_b]:
+                    footprint_matrix[pair_key] = '<'  # B → A (reverse causal relation)
+                else:
+                    footprint_matrix[pair_key] = '#'  # No direct relation
 
-                # Create a new custom Event object
-                event = Event(activity, timestamp, event_attributes)
-                trace.add_event(event)
-
-            # Add the trace to the custom event log
-            eventlog.traces.append(trace)
-
-        return eventlog
-
+        return footprint_matrix

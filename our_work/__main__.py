@@ -1,18 +1,18 @@
 from EventLog import EventLog
-
+from GraphBuilder import GraphBuilder
 
 if __name__ == "__main__":
     file_name = "data.xes"
     eventlog = EventLog.load_xes(file_name)
     
-    # convert the event log to a pm4py log
-    pm4py_log = eventlog.to_pm4py()
+    # Build a Petri net graph
+    graph_builder = GraphBuilder()
+    petrinet_graph = graph_builder.build_trace_graph(eventlog)
     
-    eventlog_again = EventLog.from_pm4py(pm4py_log)
+    print(petrinet_graph)    
     
-    print(f"Original event log: {eventlog}")
-    print(f"Event log from pm4py log: {eventlog_again}")
-    
+    # Visualize the graph
+    graph_builder.visualize_graph(petrinet_graph)
     
     
     

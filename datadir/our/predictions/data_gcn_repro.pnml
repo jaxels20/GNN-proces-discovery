@@ -2,14 +2,14 @@
 <pnml>
   <net id="net1" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
     <page id="n0">
-      <place id="p3">
-        <name>
-          <text>p3</text>
-        </name>
-      </place>
       <place id="p1">
         <name>
           <text>p1</text>
+        </name>
+      </place>
+      <place id="p3">
+        <name>
+          <text>p3</text>
         </name>
       </place>
       <place id="source">
@@ -30,11 +30,22 @@
           <text>p2</text>
         </name>
       </place>
+      <place id="p4">
+        <name>
+          <text>p4</text>
+        </name>
+      </place>
       <place id="sink">
         <name>
           <text>sink</text>
         </name>
       </place>
+      <transition id="&gt;">
+        <name>
+          <text>&gt;</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="eeecfeb2-d57e-4cc2-9363-142b5f7c8cfb"/>
+      </transition>
       <transition id="B">
         <name>
           <text>B</text>
@@ -50,30 +61,24 @@
           <text>A</text>
         </name>
       </transition>
-      <transition id="&gt;">
-        <name>
-          <text>&gt;</text>
-        </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="43573fd1-5cae-426a-8689-3e6a69835844"/>
-      </transition>
       <transition id="|">
         <name>
           <text>|</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="c893615c-2064-4769-b3ef-875aeba695db"/>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="4c58423b-2a7c-4f1b-a432-0fa1486dfcaf"/>
       </transition>
-      <arc id="6132608544" source="&gt;" target="p0"/>
-      <arc id="6135470592" source="A" target="p1"/>
-      <arc id="6135469152" source="p1" target="C"/>
-      <arc id="6135469728" source="C" target="p2"/>
-      <arc id="6135468864" source="p2" target="|"/>
-      <arc id="6135469248" source="B" target="p3"/>
-      <arc id="6135469344" source="p3" target="|"/>
-      <arc id="13122526368" source="|" target="sink"/>
-      <arc id="6135468624" source="p0" target="A"/>
-      <arc id="6135471600" source="p1" target="B"/>
-      <arc id="6135469584" source="B" target="p2"/>
-      <arc id="6135469680" source="source" target="&gt;"/>
+      <arc id="13152661568" source="&gt;" target="p0"/>
+      <arc id="13152665408" source="A" target="p2"/>
+      <arc id="13152664928" source="A" target="p1"/>
+      <arc id="13152663776" source="p1" target="B"/>
+      <arc id="13152663968" source="p2" target="C"/>
+      <arc id="6130374976" source="|" target="sink"/>
+      <arc id="13152662864" source="p0" target="A"/>
+      <arc id="13152661904" source="C" target="p3"/>
+      <arc id="13152664688" source="p3" target="|"/>
+      <arc id="13152665072" source="B" target="p4"/>
+      <arc id="6130373584" source="p4" target="|"/>
+      <arc id="13152663056" source="source" target="&gt;"/>
     </page>
     <finalmarkings>
       <marking>

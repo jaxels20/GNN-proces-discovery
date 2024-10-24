@@ -61,7 +61,9 @@ def save_event_log_as_npz(traces, file_path):
 if __name__ == "__main__":
     # Example traces (list of strings representing activity sequences)
     traces = ["ABCDF", "ABCDF", "ACBEF", "ACBEF"]
-
+    traces = ["ABCD", "ABCBCD", "ABCBCBCD"]
+    traces = ["ABC", "ACB"]
+    
     # Get the current directory where the script is located
     current_directory = os.path.dirname(os.path.abspath(__file__))
 

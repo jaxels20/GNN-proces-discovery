@@ -1,41 +1,41 @@
 {
   "L": {
-    "fitness": 0.9,
-    "fitness_alignments": 0.75,
-    "fitness_alignments_percFitTraces": 50.0,
+    "fitness": 1.0,
+    "fitness_alignments": 1.0,
+    "fitness_alignments_percFitTraces": 100.0,
     "fitness_entropy_exact": null,
     "fitness_entropy_partial": null,
-    "fitness_percFitTraces": 50.0,
-    "fscore": 0.9473684210526316,
-    "fscore_alignments": 0.8571428571428571,
+    "fitness_percFitTraces": 100.0,
+    "fscore": 1.0,
+    "fscore_alignments": 1.0,
     "fscore_entropy_exact": null,
     "fscore_entropy_partial": null,
-    "generalization": 0.3757359312880715,
-    "metricsAverageWeight": 0.7804724443604795,
+    "generalization": 0.29289321881345254,
+    "metricsAverageWeight": 0.8232233047033631,
     "precision": 1.0,
     "precision_alignments": 1.0,
     "precision_entropy_exact": null,
     "precision_entropy_partial": null,
-    "simplicity": 0.8461538461538463
+    "simplicity": 1.0
   },
   "L_17": {
-    "fitness": 0.9,
-    "fitness_alignments": 0.75,
-    "fitness_alignments_percFitTraces": 50.0,
+    "fitness": 1.0,
+    "fitness_alignments": 1.0,
+    "fitness_alignments_percFitTraces": 100.0,
     "fitness_entropy_exact": null,
     "fitness_entropy_partial": null,
-    "fitness_percFitTraces": 50.0,
-    "fscore": 0.9473684210526316,
-    "fscore_alignments": 0.8571428571428571,
+    "fitness_percFitTraces": 100.0,
+    "fscore": 1.0,
+    "fscore_alignments": 1.0,
     "fscore_entropy_exact": null,
     "fscore_entropy_partial": null,
-    "generalization": 0.3757359312880715,
-    "metricsAverageWeight": 0.7804724443604795,
+    "generalization": 0.29289321881345254,
+    "metricsAverageWeight": 0.8232233047033631,
     "precision": 1.0,
     "precision_alignments": 1.0,
     "precision_entropy_exact": null,
     "precision_entropy_partial": null,
-    "simplicity": 0.8461538461538463
+    "simplicity": 1.0
   },
   "args": {
     "beam_length": 5,
@@ -61,25 +61,34 @@
   "easy_soundness": true,
   "log_filename": "datadir/our/data",
   "petrinet_filename": "datadir/our/predictions/data_gcn_repro",
-  "sound": false,
+  "sound": true,
   "soundness_info": {
     "s_components": [
       [
-        "p2",
-        "B",
+        "p0",
+        "short_circuited_transition",
+        "source",
         "sink",
         "|",
         "C",
-        "short_circuited_transition",
-        "p0",
-        ">",
         "A",
+        ">",
+        "p3",
+        "p2"
+      ],
+      [
         "p1",
-        "source"
+        "p0",
+        "source",
+        "short_circuited_transition",
+        "sink",
+        "|",
+        "A",
+        "B",
+        ">",
+        "p4"
       ]
     ],
-    "uncovered_places_s_component": [
-      "p3"
-    ]
+    "uncovered_places_s_component": []
   }
 }

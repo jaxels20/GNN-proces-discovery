@@ -1,0 +1,45 @@
+{
+  "L": {
+    "fitness": 1.0,
+    "fitness_alignments": 1.0,
+    "fitness_alignments_percFitTraces": 100.0,
+    "fitness_entropy_exact": null,
+    "fitness_entropy_partial": null,
+    "fitness_percFitTraces": 100.0,
+    "fscore": 0.9787234042553191,
+    "fscore_alignments": 0.9787234042553191,
+    "fscore_entropy_exact": null,
+    "fscore_entropy_partial": null,
+    "generalization": 0.49029052230067927,
+    "metricsAverageWeight": 0.8621559639085032,
+    "precision": 0.9583333333333334,
+    "precision_alignments": 0.9583333333333334,
+    "precision_entropy_exact": null,
+    "precision_entropy_partial": null,
+    "simplicity": 1.0
+  },
+  "L_0": null,
+  "args": {},
+  "easy_soundness": true,
+  "log_filename": "datadir/our/data",
+  "petrinet_filename": "datadir/our/predictions/data_inductive",
+  "sound": true,
+  "soundness_info": {
+    "s_components": [
+      [
+        "p_5",
+        "B",
+        "skip_3",
+        "sink",
+        "A",
+        "D",
+        "short_circuited_transition",
+        "source",
+        "p_6",
+        "C",
+        "p_7"
+      ]
+    ],
+    "uncovered_places_s_component": []
+  }
+}

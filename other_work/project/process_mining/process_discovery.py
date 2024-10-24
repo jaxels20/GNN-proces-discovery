@@ -166,8 +166,9 @@ class GnnMiner(ProcessDiscovery):
     name = self.mLogHandler.mLogFilename.split('/')[-1].split('.')[0]
 
     start_construction_time = time.time()
+    
+    # HERE THEY BUILD THE GRAPH 
     pb = GraphBuilder(name, self.embedding_size, traces, counts, transitionLabels, fDepth=1, embedding_strategy=self.embedding_strategy, include_frequency=self.include_frequency, fPetrinetHandler=None)
-    # TODO improve logging.
     print(f'Graph construction took: {time.time() - start_construction_time:.3f} seconds')
     print('number of nodes', pb.mNet.number_of_nodes())
     print('number of candidate places', len(pb.mPossiblePlaces))

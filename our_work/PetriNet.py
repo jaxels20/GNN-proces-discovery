@@ -1,7 +1,7 @@
 from graphviz import Digraph
 from pm4py.objects.petri_net.obj import PetriNet as PM4PyPetriNet, Marking
 from pm4py.analysis import check_soundness
-from pm4py.objects.petri_net.utils.check_soundness import check_easy_soundness_net_in_fin_marking, check_easy_soundness_of_wfnet
+from pm4py.objects.petri_net.utils.check_soundness import check_easy_soundness_net_in_fin_marking
 
 
 class Place:
@@ -93,7 +93,7 @@ class PetriNet:
         transition = Transition(name)
         self.transitions.append(transition)
 
-    def add_arc(self, source, target, weight: int = 1):
+    def add_arc(self, source: str, target: str, weight: int = 1):
         """Add an arc connecting a place and a transition or vice versa."""
         if source not in [place.name for place in self.places] + [transition.name for transition in self.transitions]:
             raise ValueError(f"Source '{source}' does not exist in the Petri net")
@@ -117,14 +117,15 @@ class PetriNet:
                 return transition
         return None
 
-    def is_transition_enabled(self, transition: Transition) -> bool:
+    def is_transition_enabled(self, transition_name: str) -> bool:
         """
         Check if a transition is enabled.
         
         A transition is enabled if all its input places have enough tokens.
         """
-        input_arcs = [arc for arc in self.arcs if arc.target == transition]
-        return all(arc.source.tokens >= arc.weight for arc in input_arcs)
+        
+        input_arcs = [arc for arc in self.arcs if arc.target == transition_name]
+        return all(self.get_place_by_name(arc.source).tokens >= arc.weight for arc in input_arcs)
 
     def fire_transition(self, transition: Transition):
         """
@@ -134,18 +135,20 @@ class PetriNet:
         -------
         ValueError : If the transition is not enabled.
         """
-        if not self.is_transition_enabled(transition):
+        if not self.is_transition_enabled(transition.name):
             raise ValueError(f"Transition '{transition.name}' is not enabled")
 
         # Remove tokens from input places
-        input_arcs = [arc for arc in self.arcs if arc.target == transition]
+        input_arcs = [arc for arc in self.arcs if arc.target == transition.name]
         for arc in input_arcs:
-            arc.source.remove_tokens(arc.weight)
+            input_place = self.get_place_by_name(arc.source)
+            input_place.remove_tokens(arc.weight)
 
         # Add tokens to output places
-        output_arcs = [arc for arc in self.arcs if arc.source == transition]
+        output_arcs = [arc for arc in self.arcs if arc.source == transition.name]
         for arc in output_arcs:
-            arc.target.add_tokens(arc.weight)
+            output_place = self.get_place_by_name(arc.target)
+            output_place.add_tokens(arc.weight)
 
     def __repr__(self):
         return f"PetriNet(Places: {len(self.places)}, Transitions: {len(self.transitions)}, Arcs: {len(self.arcs)})"
@@ -210,11 +213,17 @@ class PetriNet:
         for arc in self.arcs:
             pm4py_arc = PM4PyPetriNet.Arc(pm4py_dict[arc.source], pm4py_dict[arc.target])
             pm4py_pn.arcs.add(pm4py_arc)
+            if arc.source in [p.name for p in pm4py_pn.places]:
+                place = pm4py_dict[arc.source]
+                place.out_arcs.add(pm4py_arc)
+            if arc.target in [p.name for p in pm4py_pn.places]:
+                place = pm4py_dict[arc.target]
+                place.in_arcs.add(pm4py_arc)
 
-        initial_marking = Marking()
-        initial_marking[pm4py_dict[self.get_start_place().name]] = 1
-        final_marking = Marking()
-        final_marking[pm4py_dict[self.get_end_place().name]] = 1
+        source = pm4py_dict[self.get_start_place().name]
+        target = pm4py_dict[self.get_end_place().name]
+        initial_marking = Marking({source: 1})
+        final_marking = Marking({target: 1})
 
         return pm4py_pn, initial_marking, final_marking
 
@@ -230,24 +239,30 @@ class PetriNet:
         """
         places = [Place(p.name) for p in pm4py_pn.places]
         transitions = [Transition(t.name) for t in pm4py_pn.transitions]
-        arcs = []
+        arcs = list()
         for arc in pm4py_pn.arcs:
             source_name = arc.source.name
             target_name = arc.target.name
             weight = arc.weight
             arcs.append(Arc(source_name, target_name, weight))
 
-        return cls(places, transitions, arcs)
+        # Add token to start place
+        converted_pn = cls(places, transitions, arcs)
+        start_place = converted_pn.get_start_place()
+        start_place.tokens = 1
+
+        return converted_pn
 
     def soundness_check(self) -> bool:
-        """Check if the Petri net is sound"""
+        """Check if the Petri net is sound, i.e. safeness, proper completion, option to complete and absence of dead parts"""
         pm4py_pn, initial_marking, final_marking = self.to_pm4py()
-        return check_soundness(pm4py_pn, initial_marking, final_marking)
+        return check_soundness(pm4py_pn, initial_marking, final_marking)[0]
     
     def easy_soundness_check(self) -> bool:
-        """Check if the Petri net is sound"""
+        """Check if the Petri net is easy-sound, i.e. reachability ensured but dead transitions can be present"""
         pm4py_pn, initial_marking, final_marking = self.to_pm4py()
-        return check_easy_soundness_net_in_fin_marking(pm4py_pn, initial_marking, final_marking), check_easy_soundness_of_wfnet(pm4py_pn)
+        res = check_easy_soundness_net_in_fin_marking(pm4py_pn, initial_marking, final_marking)
+        return res
     
     def connectedness_check(self) -> bool:
         """Check if the Petri net is connected, i.e. all transitions must either have an input or an output arc"""

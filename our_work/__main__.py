@@ -21,5 +21,5 @@ if __name__ == "__main__":
     pn_visualizer.view(gviz)
     
     # print(petri_net.soundness_check())
-    # print(petri_net.easy_soundness_check())
+    print(petri_net.easy_soundness_check())
     # print(petri_net.connectedness_check())

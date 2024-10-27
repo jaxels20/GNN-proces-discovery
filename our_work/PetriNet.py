@@ -1,7 +1,7 @@
 from graphviz import Digraph
 from pm4py.objects.petri_net.obj import PetriNet as PM4PyPetriNet, Marking
 from pm4py.analysis import check_soundness
-from pm4py.objects.petri_net.utils.check_soundness import check_easy_soundness_net_in_fin_marking
+from pm4py.objects.petri_net.utils.check_soundness import check_easy_soundness_net_in_fin_marking, check_easy_soundness_of_wfnet
 
 
 class Place:
@@ -247,7 +247,7 @@ class PetriNet:
     def easy_soundness_check(self) -> bool:
         """Check if the Petri net is sound"""
         pm4py_pn, initial_marking, final_marking = self.to_pm4py()
-        return check_easy_soundness_net_in_fin_marking(pm4py_pn, initial_marking, final_marking)
+        return check_easy_soundness_net_in_fin_marking(pm4py_pn, initial_marking, final_marking), check_easy_soundness_of_wfnet(pm4py_pn)
     
     def connectedness_check(self) -> bool:
         """Check if the Petri net is connected, i.e. all transitions must either have an input or an output arc"""

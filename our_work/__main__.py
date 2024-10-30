@@ -5,6 +5,20 @@ from pm4py.visualization.petri_net import visualizer as pn_visualizer
 
 
 if __name__ == "__main__":
+    file_name = "data.xes"
+    eventlog = EventLog.load_xes(file_name)
+    print(eventlog)
+    
+    foot_print = eventlog.get_footprint_matrix()
+    
+    # Build a Petri net graph
+    graph_builder = GraphBuilder()
+    petrinet_graph = graph_builder.build_petrinet_graph(eventlog)
+    
+    # print the content of the graph
+    for key, value in petrinet_graph.items():
+        print(key, value)
+    
     # SOUND NET EXAMPLE
     test_2_p = [Place("p1", 1), Place("p2", 0), Place("p3", 0)]
     test_2_t = [Transition("t1"), Transition("t2")]

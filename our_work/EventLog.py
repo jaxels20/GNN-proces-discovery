@@ -301,7 +301,7 @@ class EventLog:
     def get_footprint_matrix(self):
         """
         Calculate the footprint matrix for the event log and return it in the form:
-        {('(A, B)': '>'), ('(A, C)': '#'), ...}
+        {('B', 'A'): '<', ('B', 'C'): '||'...}
 
         Returns:
         --------
@@ -326,7 +326,7 @@ class EventLog:
         # Step 4: Fill the footprint matrix based on direct succession and reverse relations
         for activity_a in all_activities:
             for activity_b in all_activities:
-                pair_key = f"({activity_a}, {activity_b})"
+                pair_key = (activity_a, activity_b)
                 if activity_b in direct_succession[activity_a]:
                     if activity_a in direct_succession[activity_b]:
                         footprint_matrix[pair_key] = '||'  # Parallel relation

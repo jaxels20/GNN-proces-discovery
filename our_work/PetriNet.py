@@ -249,12 +249,22 @@ class PetriNet:
                 pm4py_dict[arc.source], pm4py_dict[arc.target]
             )
             pm4py_pn.arcs.add(pm4py_arc)
-            if arc.source in [p.name for p in pm4py_pn.places]:
+            # Add out arcs and in arc property to places
+            pm4py_places = [p.name for p in pm4py_pn.places]
+            if arc.source in pm4py_places:
                 place = pm4py_dict[arc.source]
                 place.out_arcs.add(pm4py_arc)
-            if arc.target in [p.name for p in pm4py_pn.places]:
+            if arc.target in pm4py_places:
                 place = pm4py_dict[arc.target]
                 place.in_arcs.add(pm4py_arc)
+            # Add out arcs and in arc property to transitions
+            pm4py_transitions = [t.name for t in pm4py_pn.transitions]
+            if arc.source in pm4py_transitions:
+                transition = pm4py_dict[arc.source]
+                transition.out_arcs.add(pm4py_arc)
+            if arc.target in pm4py_transitions:
+                transition = pm4py_dict[arc.target]
+                transition.in_arcs.add(pm4py_arc)
 
         source = pm4py_dict[self.get_start_place().name]
         target = pm4py_dict[self.get_end_place().name]

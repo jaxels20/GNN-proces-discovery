@@ -235,7 +235,7 @@ class PetriNet:
 
         for transition in self.transitions:
             pm4py_transition = PM4PyPetriNet.Transition(
-                transition.name
+                transition.name, label=transition.name if not transition.name.startswith("tau") else None
             )
             pm4py_pn.transitions.add(pm4py_transition)
             pm4py_dict[transition.name] = pm4py_transition
@@ -280,11 +280,21 @@ class PetriNet:
             PetriNet: Petri net object
         """
         places = [Place(p.name) for p in pm4py_pn.places]
-        transitions = [Transition(t.name) for t in pm4py_pn.transitions]
+        index = 0
+        transitions = []
+        for t in pm4py_pn.transitions:
+            if t.label is None:
+                t.name = f"tau_{index}"
+                index += 1
+                transitions.append(Transition(t.name))
+            else:
+                t.name = t.label
+                transitions.append(Transition(t.name))
+                
         arcs = []
         for arc in pm4py_pn.arcs:
-            source_name = arc.source.name # if hasattr(arc.source, "label") else arc.source.name
-            target_name = arc.target.name # if hasattr(arc.target, "label") else arc.target.name
+            source_name = arc.source.name
+            target_name = arc.target.name
             weight = arc.weight
             arcs.append(Arc(source_name, target_name, weight))
 

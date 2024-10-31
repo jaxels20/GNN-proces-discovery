@@ -301,13 +301,13 @@ class EventLog:
     def get_footprint_matrix(self):
         """
         Calculate the footprint matrix for the event log and return it in the form:
-        {('B', 'A'): '<', ('B', 'C'): '||'...}
+        {('B', 'A'): '>', ('B', 'C'): '||'...}
 
         Returns:
         --------
         dict:
             A dictionary where keys are tuples representing pairs of activities ('A', 'B')
-            and values are the relations ('>', '<', '||', '#').
+            and values are the relations ('>', '||', '#').
         """
         # Step 1: Initialize a defaultdict for direct succession relationships
         direct_succession = defaultdict(set)
@@ -332,8 +332,8 @@ class EventLog:
                         footprint_matrix[pair_key] = '||'  # Parallel relation
                     else:
                         footprint_matrix[pair_key] = '>'  # A → B (causal relation)
-                elif activity_a in direct_succession[activity_b]:
-                    footprint_matrix[pair_key] = '<'  # B → A (reverse causal relation)
+                # elif activity_a in direct_succession[activity_b]:
+                #     footprint_matrix[pair_key] = '<'  # B → A (reverse causal relation)
                 else:
                     footprint_matrix[pair_key] = '#'  # No direct relation
 

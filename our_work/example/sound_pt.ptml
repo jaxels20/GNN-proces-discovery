@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<ptml>
+    <processTree id="sound_tree_extended" name="sound_tree" root="seq1">
+        <sequence id="seq1" name=""/>
+        <manualTask id="task_a" name="A"/>
+        <manualTask id="task_b" name="B"/>
+        
+        <parentsNode id="p1" sourceId="seq1" targetId="task_a"/>
+        <parentsNode id="p2" sourceId="seq1" targetId="task_b"/>
+    </processTree>
+</ptml>

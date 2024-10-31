@@ -5,6 +5,8 @@ from pm4py.analysis import check_soundness
 from pm4py.objects.petri_net.utils.check_soundness import (
     check_easy_soundness_net_in_fin_marking,
 )
+from pm4py.objects.process_tree.importer.variants.ptml import apply as import_ptml_tree
+from pm4py.objects.conversion.process_tree.variants.to_petri_net import apply as convert_pt_to_pn
 from EventLog import EventLog
 
 
@@ -65,7 +67,7 @@ class Arc:
         The weight of the arc.
     """
 
-    def __init__(self, source, target, weight: int = 1):
+    def __init__(self, source: str, target: str, weight: int = 1):
         self.source = source
         self.target = target
         self.weight = weight
@@ -90,6 +92,9 @@ class PetriNet:
         self.transitions = transitions
         self.arcs = arcs
 
+    def __repr__(self):
+        return f"PetriNet(Places: {len(self.places)}, Transitions: {len(self.transitions)}, Arcs: {len(self.arcs)})"
+    
     def add_place(self, name: str, tokens: int = 0):
         """Add a place to the Petri net."""
         if name in [place.name for place in self.places]:
@@ -108,15 +113,12 @@ class PetriNet:
 
     def add_arc(self, source: str, target: str, weight: int = 1):
         """Add an arc connecting a place and a transition or vice versa."""
-        if source not in [place.name for place in self.places] + [
-            transition.name for transition in self.transitions
-        ]:
+        ids = [place.name for place in self.places] + [transition.name for transition in self.transitions]
+        if source.name not in ids:
             raise ValueError(f"Source '{source}' does not exist in the Petri net")
-        if target not in [place.name for place in self.places] + [
-            transition.name for transition in self.transitions
-        ]:
+        if target.name not in ids:
             raise ValueError(f"Target '{target}' does not exist in the Petri net")
-
+        
         arc = Arc(source, target, weight)
         self.arcs.append(arc)
 
@@ -136,11 +138,8 @@ class PetriNet:
 
     def is_transition_enabled(self, transition_name: str) -> bool:
         """
-        Check if a transition is enabled.
-
-        A transition is enabled if all its input places have enough tokens.
+        Check if a transition is enabled. A transition is enabled if all its input places have enough tokens.
         """
-
         input_arcs = [arc for arc in self.arcs if arc.target == transition_name]
         return all(
             self.get_place_by_name(arc.source).tokens >= arc.weight
@@ -150,7 +149,7 @@ class PetriNet:
     def fire_transition(self, transition: Transition):
         """
         Fire a transition if it is enabled, moving tokens from input places to output places.
-
+        
         Raises:
         -------
         ValueError : If the transition is not enabled.
@@ -169,9 +168,6 @@ class PetriNet:
         for arc in output_arcs:
             output_place = self.get_place_by_name(arc.target)
             output_place.add_tokens(arc.weight)
-
-    def __repr__(self):
-        return f"PetriNet(Places: {len(self.places)}, Transitions: {len(self.transitions)}, Arcs: {len(self.arcs)})"
 
     def visualize(self, filename="petri_net", format="png"):
         """
@@ -228,8 +224,8 @@ class PetriNet:
         return None
 
     def to_pm4py(self):
-        """Convert our Petri net class to a pm4py Petri net."""
-        pm4py_pn = PM4PyPetriNet("Custom_Petri_Net")
+        """Convert our Petri net class to a pm4py Petri net and return it"""
+        pm4py_pn = PM4PyPetriNet()
         pm4py_dict = {}
 
         for place in self.places:
@@ -239,7 +235,7 @@ class PetriNet:
 
         for transition in self.transitions:
             pm4py_transition = PM4PyPetriNet.Transition(
-                transition.name, transition.name
+                transition.name
             )
             pm4py_pn.transitions.add(pm4py_transition)
             pm4py_dict[transition.name] = pm4py_transition
@@ -249,20 +245,20 @@ class PetriNet:
                 pm4py_dict[arc.source], pm4py_dict[arc.target]
             )
             pm4py_pn.arcs.add(pm4py_arc)
-            # Add out arcs and in arc property to places
-            pm4py_places = [p.name for p in pm4py_pn.places]
-            if arc.source in pm4py_places:
+            
+            # Add out arc and in arc property to places
+            if arc.source in [p.name for p in pm4py_pn.places]:
                 place = pm4py_dict[arc.source]
                 place.out_arcs.add(pm4py_arc)
-            if arc.target in pm4py_places:
+            else:
                 place = pm4py_dict[arc.target]
                 place.in_arcs.add(pm4py_arc)
-            # Add out arcs and in arc property to transitions
-            pm4py_transitions = [t.name for t in pm4py_pn.transitions]
-            if arc.source in pm4py_transitions:
+                
+            # Add out arc and in arc property to transitions
+            if arc.source in [t.name for t in pm4py_pn.transitions]:
                 transition = pm4py_dict[arc.source]
                 transition.out_arcs.add(pm4py_arc)
-            if arc.target in pm4py_transitions:
+            else:
                 transition = pm4py_dict[arc.target]
                 transition.in_arcs.add(pm4py_arc)
 
@@ -285,10 +281,10 @@ class PetriNet:
         """
         places = [Place(p.name) for p in pm4py_pn.places]
         transitions = [Transition(t.name) for t in pm4py_pn.transitions]
-        arcs = list()
+        arcs = []
         for arc in pm4py_pn.arcs:
-            source_name = arc.source.name
-            target_name = arc.target.name
+            source_name = arc.source.name # if hasattr(arc.source, "label") else arc.source.name
+            target_name = arc.target.name # if hasattr(arc.target, "label") else arc.target.name
             weight = arc.weight
             arcs.append(Arc(source_name, target_name, weight))
 
@@ -298,6 +294,13 @@ class PetriNet:
         start_place.tokens = 1
 
         return converted_pn
+
+    @staticmethod
+    def from_ptml(ptml_file: str):
+        """Create a Petri net from a PTML file."""
+        pt = import_ptml_tree(ptml_file)
+        pm4py_pn, _, _ = convert_pt_to_pn(pt)
+        return PetriNet.from_pm4py(pm4py_pn)
 
     def soundness_check(self) -> bool:
         """Check if the Petri net is sound, i.e. safeness, proper completion, option to complete and absence of dead parts"""

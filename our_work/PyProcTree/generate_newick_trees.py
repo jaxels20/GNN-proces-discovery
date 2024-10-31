@@ -33,9 +33,9 @@ OUTPUT:
 """
 import sys
 import argparse
-from generateTree import RandomTree
-from convert_to_ptml import PtmlConverter
-from tree_to_graphviz import GraphvizTree
+from PyProcTree.generateTree import RandomTree
+from PyProcTree.convert_to_ptml import PtmlConverter
+from PyProcTree.tree_to_graphviz import GraphvizTree
 import multiprocessing
 from multiprocessing.dummy import Pool as ThreadPool
 import time

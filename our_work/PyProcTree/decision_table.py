@@ -5,10 +5,9 @@ Created on Fri May 19 11:26:43 2017
 @author: lucp8356
 """
 import sys
-sys.path.insert(0, 'newick/')
-from case_attribute import CaseAttribute
+from PyProcTree.case_attribute import CaseAttribute
 import tabulate as tab
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 
 #delete automatic escaping of characters
 del(tab.LATEX_ESCAPE_RULES[u'$'])

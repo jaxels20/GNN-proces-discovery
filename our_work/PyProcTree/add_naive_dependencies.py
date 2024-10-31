@@ -18,8 +18,7 @@ output:
 """
 
 import sys
-sys.path.insert(0, '../newick')
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 import random
 import uuid
 from math import pow,fsum

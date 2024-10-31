@@ -10,14 +10,14 @@ The following tables list all of the available components in this module.
 """
 from pkgutil import extend_path
 
-from simpy.core import Environment
-from simpy.rt import RealtimeEnvironment
-from simpy.events import Event, Timeout, Process, AllOf, AnyOf, Interrupt
-from simpy.resources.resource import (
+from PyProcTree.simpy.core import Environment
+from PyProcTree.simpy.rt import RealtimeEnvironment
+from PyProcTree.simpy.events import Event, Timeout, Process, AllOf, AnyOf, Interrupt
+from PyProcTree.simpy.resources.resource import (
     Resource, PriorityResource, PreemptiveResource)
-from simpy.resources.container import Container
-from simpy.resources.store import Store, FilterStore
-from simpy.util import test
+from PyProcTree.simpy.resources.container import Container
+from PyProcTree.simpy.resources.store import Store, FilterStore
+from PyProcTree.simpy.util import test
 
 
 def compile_toc(entries, section_marker='='):

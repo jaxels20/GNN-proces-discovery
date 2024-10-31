@@ -1,0 +1,1 @@
+(((((a:1,p:1)or:1,g:1)sequence:1,e:1,(f:0.9,h:0.1)choice:1)loop:1,((d:1,j:1)parallel:1,i:1)sequence:1)parallel:0.9,(b:1,(c:1,k:1,((l:1,o:1)sequence:1,(m:1,s:1)parallel:1,((n:1,r:1)parallel:0.9,q:0.1)choice:1)loop:1)loop:1)sequence:0.1)choice:1;

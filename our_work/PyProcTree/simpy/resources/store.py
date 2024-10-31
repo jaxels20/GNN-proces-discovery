@@ -8,8 +8,8 @@ retrieved from the store in the order they were put in. The *get* requests of a
 matching a given criterion.
 
 """
-from simpy.core import BoundClass
-from simpy.resources import base
+from PyProcTree.simpy.core import BoundClass
+from PyProcTree.simpy.resources import base
 
 
 class StorePut(base.Put):

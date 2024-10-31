@@ -28,8 +28,8 @@ processes can define a request priority, and a :class:`PreemptiveResource`
 whose resource users can be preempted by requests with a higher priority.
 
 """
-from simpy.core import BoundClass
-from simpy.resources import base
+from PyProcTree.simpy.core import BoundClass
+from PyProcTree.simpy.resources import base
 
 
 class Preempted(object):

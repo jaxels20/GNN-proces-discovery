@@ -10,11 +10,19 @@
       <string key="concept:name" value="B"/>
       <date key="time:timestamp" value=""/>
     </event>
+    <event>
+      <string key="concept:name" value="C"/>
+      <date key="time:timestamp" value=""/>
+    </event>
   </trace>
   <trace>
     <string key="concept:name" value="trace_2"/>
     <event>
       <string key="concept:name" value="A"/>
+      <date key="time:timestamp" value=""/>
+    </event>
+    <event>
+      <string key="concept:name" value="D"/>
       <date key="time:timestamp" value=""/>
     </event>
     <event>
@@ -29,7 +37,11 @@
       <date key="time:timestamp" value=""/>
     </event>
     <event>
-      <string key="concept:name" value="D"/>
+      <string key="concept:name" value="E"/>
+      <date key="time:timestamp" value=""/>
+    </event>
+    <event>
+      <string key="concept:name" value="C"/>
       <date key="time:timestamp" value=""/>
     </event>
   </trace>

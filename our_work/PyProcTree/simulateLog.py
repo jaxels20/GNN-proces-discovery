@@ -15,13 +15,12 @@ OUTPUT:
 """
 
 import sys
-sys.path.insert(0, '../newick')
-sys.path.insert(0, '../simpy')
-from tree import TreeNode
+
+from PyProcTree.tree import TreeNode
 import random
 import datetime
-from simpy.core import Environment
-from simpy.events import AllOf, AnyOf, NOf, Zombie
+from PyProcTree.simpy.core import Environment
+from PyProcTree.simpy.events import AllOf, AnyOf, NOf, Zombie
 
 
 class Case():

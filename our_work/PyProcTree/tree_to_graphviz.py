@@ -9,8 +9,7 @@ Dependencies: graphviz!
 
 import graphviz
 import sys
-sys.path.insert(0, '../newick')
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 import uuid
 
 class GraphvizTree():

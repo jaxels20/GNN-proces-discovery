@@ -8,11 +8,10 @@ and returns a set of cases with traces and case attributes.
 @author: Toon Jouck
 """
 import sys
-#sys.path.insert(0, 'datasimpy/')
 import random
-from case_attribute import CaseAttribute
-from simpy.core import Environment
-from simpy.events import AllOf, AnyOf, NOf, Zombie
+from PyProcTree.case_attribute import CaseAttribute
+from PyProcTree.simpy.core import Environment
+from PyProcTree.simpy.events import AllOf, AnyOf, NOf, Zombie
 
 class Case():
     '''
@@ -719,7 +718,7 @@ class LogSimulator():
                 try:
                     c[node] = True
                 except ValueError:
-                    print 'missing event', event
+                    print('missing event', event)
         return c
 
     #@deprecated

@@ -7,8 +7,8 @@ Tankers increase and refuelled cars decrease the amount of gas in the station's
 fuel tanks.
 
 """
-from simpy.core import BoundClass
-from simpy.resources import base
+from PyProcTree.simpy.core import BoundClass
+from PyProcTree.simpy.resources import base
 
 
 class ContainerPut(base.Put):

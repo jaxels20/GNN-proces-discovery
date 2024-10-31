@@ -2,13 +2,13 @@ import json
 from pathlib import Path
 import time
 import multiprocessing
-from generate_newick_trees import abortable_generate_tree, generate_tree
-from generate_logs import write_as_csv, write_as_xes, select_child
+from PyProcTree.generate_newick_trees import abortable_generate_tree, generate_tree
+from PyProcTree.generate_logs import write_as_csv, write_as_xes, select_child
 import os
-from tree import TreeNode
-from simulateLog import LogSimulator
-from simulateTrace import TraceSimulator
-from add_noise import NoiseGenerator
+from PyProcTree.tree import TreeNode
+from PyProcTree.simulateLog import LogSimulator
+from PyProcTree.simulateTrace import TraceSimulator
+from PyProcTree.add_noise import NoiseGenerator
 
 
 
@@ -45,7 +45,7 @@ def generate_process_trees(config: json, output_dir: str, timeout: int = 1000, r
     print('total tree generation time:', total_time)
 
 
-def generate_logs(input_dir: str, output_dir: str, size: int, noise: float, timestamps: bool, format: str):
+def generate_logs(input_dir: str, output_dir: str, size: int, noise: float, timestamps: bool = False, format: str = 'xes'):
     #specify the folder with the trees
     #tree_files = glob.glob(tree_folder + "*.nw")
     tree_files = os.listdir(input_dir)

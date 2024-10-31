@@ -16,8 +16,7 @@ Output:
 """
 
 import sys
-sys.path.insert(0, '../newick')
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 import scipy as sp
 import itertools
 
@@ -138,7 +137,7 @@ def sumOfPaths(paths):
 class NoUniqueTraces:
     def __init__(self,tree_string,loop_iterations):
         t = TreeNode(tree_string,format = 1)
-        print t.get_ascii(show_internal=True, compact=False)
+        print(t.get_ascii(show_internal=True, compact=False))
         paths = []
         paths = numberOfPaths(t.get_tree_root(),paths,loop_iterations)
         self.no_unique_traces = sumOfPaths(paths)

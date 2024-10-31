@@ -19,12 +19,12 @@ OUTPUT:import argparse
 import glob
 import sys
 import argparse
-from tree import TreeNode
-from simulateLog import LogSimulator
-from simulateTrace import TraceSimulator
-from add_noise import NoiseGenerator
+from PyProcTree.tree import TreeNode
+from PyProcTree.simulateLog import LogSimulator
+from PyProcTree.simulateTrace import TraceSimulator
+from PyProcTree.add_noise import NoiseGenerator
 import xml.etree.ElementTree as xmltree
-import timing
+import PyProcTree.timing
 import random
 
 def write_as_csv(traces,tree_index,record_timestamps):
@@ -55,7 +55,7 @@ def write_as_csv(traces,tree_index,record_timestamps):
 
 def write_as_xes(traces,tree_index,record_timestamps, output_dir):
     '''writes log to xes-formatted file'''
-    with open(output_dir + "log" + tree_index + ".xes", 'w') as xes_file:
+    with open(output_dir + "/" + tree_index.split("/")[1] + ".xes", 'w') as xes_file:
         xes_file.write('<?xml version="1.0" encoding="UTF-8" ?>\n')
         root = xmltree.Element('log')
         root.attrib['xes.version']="1.0" 

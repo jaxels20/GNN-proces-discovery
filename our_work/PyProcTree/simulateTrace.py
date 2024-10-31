@@ -14,10 +14,10 @@ OUTPUT:
 """
 
 import sys
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 import random
-from simpy.core import Environment
-from simpy.events import AllOf, AnyOf, NOf, Zombie
+from PyProcTree.simpy.core import Environment
+from PyProcTree.simpy.events import AllOf, AnyOf, NOf, Zombie
 
 
 class Case():

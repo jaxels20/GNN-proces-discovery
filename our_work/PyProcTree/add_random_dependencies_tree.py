@@ -21,8 +21,7 @@ DEPRECATED
 """
 
 import sys
-sys.path.insert(0, '../newick')
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 import itertools
 import random
 import uuid

@@ -15,14 +15,13 @@ added to the final tree (after it is reduced).
 """
 
 import sys
-sys.path.insert(0, '../newick')
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 import string
 import itertools
 import random
 import math
-from add_random_dependencies_tree import Lt_dependency
-from add_naive_dependencies import Lt_dependency_naive
+from PyProcTree.add_random_dependencies_tree import Lt_dependency
+from PyProcTree.add_naive_dependencies import Lt_dependency_naive
 import scipy.stats as stats
 
 class RandomTree():

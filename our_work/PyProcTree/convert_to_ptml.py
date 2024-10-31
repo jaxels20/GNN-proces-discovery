@@ -6,8 +6,7 @@ Created on Tue Apr 07 16:25:36 2015
 """
 import uuid
 import sys
-sys.path.insert(0, '../newick')
-from tree import TreeNode
+from PyProcTree.tree import TreeNode
 
 #create a ptml file from process tree in newick format
 

@@ -6,8 +6,8 @@ Base classes of for Simpy's shared resource types.
 These events are triggered once the request has been completed.
 
 """
-from simpy.core import BoundClass
-from simpy.events import Event
+from PyProcTree.simpy.core import BoundClass
+from PyProcTree.simpy.events import Event
 
 
 class Put(Event):

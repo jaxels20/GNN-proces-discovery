@@ -66,7 +66,7 @@ import random
 import copy
 from collections import deque 
 import itertools
-from newick import read_newick, write_newick
+from PyProcTree.newick import read_newick, write_newick
 
 # the following imports are necessary to set fixed styles and faces
 """

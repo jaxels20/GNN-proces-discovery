@@ -22,6 +22,7 @@ class GraphBuilder:
             'transitions_x': [], 
             'candidate_places': [],
             'candidate_places_x': [],
+            'candidate_types': [],
             ('transition', 'to', 'place'): [],
             ('place', 'to', 'transition'): []
         }
@@ -126,7 +127,6 @@ class GraphBuilder:
         """
         footprint_matrix = eventlog.get_footprint_matrix()
         # footprint matrix look like this {('B', 'A'): '<', ('B', 'C'): '||'}
-        print(footprint_matrix)
         for key, value in footprint_matrix.items():
             source, target = key[0], key[1]
             if value == ">":

@@ -17,33 +17,70 @@ class GraphBuilder:
         # Initialize graph data structure
         graph = Data()
         
-        data = {
+        data = self._initialize_graph_data()
+        
+        data = self._add_transition_nodes(data, eventlog)
+
+        # add candidate places
+        data = self.add_candidate_places(data, eventlog)
+        
+        # Assign data to the graph
+        graph = self._assign_data_to_graph(data)
+        
+        # Correct the edge index format
+        graph.edge_index = torch.tensor(data['edges'], dtype=torch.long).t().contiguous()
+        
+        # Populate the selected_nodes attribute with 0 for all nodes
+        graph['selected_nodes'] = torch.zeros(len(graph['node_x']), dtype=torch.bool)
+        
+        # Create a mask for the place nodes
+        graph['place_mask'] = torch.tensor([nt == 'place' for nt in graph['node_types']], dtype=torch.bool)
+        
+        # Convert all attributes to PyTorch tensors
+        graph = self._attributes_to_tensor(graph)
+
+        return graph
+
+    def _initialize_graph_data(self):
+        """ Initialize the graph data structure """
+        return {
             'nodes': [],
             'edges': [],
             'node_x': [],
             'node_types': [],
-            'labels': []
+            'labels': [],
+            'selected_nodes': [],
+            'place_mask': torch.tensor([], dtype=torch.bool)
         }
-        
-        # Add all activities as transitions
+
+    def _add_transition_nodes(self, data: dict, eventlog: EventLog):
+        """ Add all activities as transition nodes in the graph. """
         for activity in eventlog.get_all_activities():
             data['nodes'].append(activity)
-            data['node_x'].append(torch.tensor([1.0]))  # Example of transition feature
+            data['node_x'].append(torch.tensor([1.0]))  # Transition feature
             data['node_types'].append("transition")
-            data['labels'].append(-1)
-        
-        
-        # add candidate places
-        data = self.add_candidate_places(data, eventlog)
-        
-        # Assign each item from the dictionary to the graph
+            data['labels'].append(-1)  # Label for transition nodes
+        return data
+
+    def _assign_data_to_graph(self, data: dict):
+        """ Assign each item from the dictionary to the graph """
+        graph = Data()
         for key, value in data.items():
             graph[key] = value
-        
-        graph.edge_index = torch.tensor(data['edges'], dtype=torch.long).t().contiguous()
-                
         return graph
+
+    def _attributes_to_tensor(self, data: Data):
+        """ Convert attributes in the data dict to PyTorch tensors """
+        data['node_x'] = torch.tensor(data['node_x'], dtype=torch.float)
+        # and also reformat the x to be a tensor of shape (num_nodes, 1)
+        data['node_x'] = data['node_x'].unsqueeze(1)
         
+        data['labels'] = torch.tensor(data['labels'], dtype=torch.long)
+        data['selected_nodes'] = torch.tensor(data['selected_nodes'], dtype=torch.bool)
+        data['place_mask'] = torch.tensor(data['place_mask'], dtype=torch.bool)
+        
+        return data
+
     @staticmethod
     def build_trace_graph(eventlog: EventLog):
         """ Build a trace graph from an event log with a single start and end node using PyTorch Geometric. """
@@ -258,14 +295,13 @@ class GraphBuilder:
         1 if the node is a true place, 0 if the node is not a true place, -1 if the node is a transition.
         """
         
-        place_mask = [i for i, node in enumerate(graph['nodes']) if graph['node_types'][i] == "place"]
+
         
         # for each place in the graph, check if it is a true place or not
-        for i in place_mask:
+        for i in graph['place_mask'].nonzero(as_tuple=True)[0]:
             graph_place = graph['nodes'][i]
             graph_ingoing_edges = graph['edge_index'][0][graph['edge_index'][1] == i]
             graph_outgoing_edges = graph['edge_index'][1][graph['edge_index'][0] == i]
-            
             
             ingoing_transitions = [graph['nodes'][j] for j in graph_ingoing_edges if graph['node_types'][j] == "transition"]
             outgoing_transitions = [graph['nodes'][j] for j in graph_outgoing_edges if graph['node_types'][j] == "transition"]

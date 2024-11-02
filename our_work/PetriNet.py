@@ -8,6 +8,9 @@ from pm4py.objects.petri_net.utils.check_soundness import (
 from pm4py.objects.process_tree.importer.variants.ptml import apply as import_ptml_tree
 from pm4py.objects.conversion.process_tree.variants.to_petri_net import apply as convert_pt_to_pn
 from EventLog import EventLog
+from pm4py.write import write_ptml
+from pm4py.convert import convert_to_process_tree as convert_to_pt
+from torch_geometric.data import Data
 
 
 class Place:
@@ -413,4 +416,15 @@ class PetriNet:
                 return True
 
         return False
-            
+
+    def to_ptml(self, filename: str):
+        """Convert the Petri net to a PTML file."""
+        pm4py_pn, init, end = self.to_pm4py()
+        pt = convert_to_pt(pm4py_pn, init, end)
+        write_ptml(pt, filename)
+        print(f"Petri net saved as {filename}")
+
+    @staticmethod
+    def from_graph(self, graph: Data):
+        "Construct a Petri net from a graph object"
+        raise NotImplementedError("Method not implemented yet")

@@ -5,6 +5,7 @@ from torch_geometric.data import HeteroData
 from torch_geometric.utils import to_networkx
 import networkx as nx
 import matplotlib.pyplot as plt
+from PetriNet import PetriNet
 
 class GraphBuilder:
     def __init__(self):
@@ -14,34 +15,33 @@ class GraphBuilder:
         """ Build a Petri net graph from an event log """
         
         # Initialize graph data structure
-        graph = HeteroData()
-
-        # Prepare data in a dictionary for unpacking
+        graph = Data()
+        
         data = {
-            'transitions': [],
-            'transitions_x': [], 
-            'candidate_places': [],
-            'candidate_places_x': [],
-            'candidate_types': [],
-            ('transition', 'to', 'place'): [],
-            ('place', 'to', 'transition'): []
+            'nodes': [],
+            'edges': [],
+            'node_x': [],
+            'node_types': [],
+            'labels': []
         }
         
         # Add all activities as transitions
         for activity in eventlog.get_all_activities():
-            data['transitions'].append(activity)
-            data['transitions_x'].append(torch.tensor([1.0]))  # Example of transition feature
+            data['nodes'].append(activity)
+            data['node_x'].append(torch.tensor([1.0]))  # Example of transition feature
+            data['node_types'].append("transition")
+            data['labels'].append(-1)
         
         
         # add candidate places
         data = self.add_candidate_places(data, eventlog)
         
-
         # Assign each item from the dictionary to the graph
         for key, value in data.items():
             graph[key] = value
         
-        
+        graph.edge_index = torch.tensor(data['edges'], dtype=torch.long).t().contiguous()
+                
         return graph
         
     @staticmethod
@@ -117,28 +117,35 @@ class GraphBuilder:
         """ Add candidate places to the Petri net graph based on the event log """
         data = self.add_one_to_one_candidate_places(data, eventlog)
         data = self.add_one_to_many_candidate_places(data, eventlog)
-        data = self.add_many_to_one_candidate_places(data, eventlog)
-        data = self.add_many_to_many_candidate_places(data, eventlog)
+        #data = self.add_many_to_many_candidate_places(data, eventlog)
         return data
     
     def add_one_to_one_candidate_places(self, data: dict, eventlog: EventLog):
         """ Add one-to-one candidate places to the Petri net graph based on the event log 
             This methods create a new place for each pair of activities that are directly followed by each other in the event log.
         """
-        footprint_matrix = eventlog.get_footprint_matrix()
+        footprint_matrix = eventlog.get_footprint_matrix(length=1)
         # footprint matrix look like this {('B', 'A'): '<', ('B', 'C'): '||'}
         for key, value in footprint_matrix.items():
             source, target = key[0], key[1]
             if value == ">":
                 # Create a new place
                 place_name = f"{source}->{target}"
-                data['candidate_places'].append(place_name)
-                data['candidate_places_x'].append(torch.tensor([1.0]))
-                # Add edges from source to place and place to target
-                transition_index = data['transitions'].index(source)
-                place_index = data['candidate_places'].index(place_name)
-                data[('transition', 'to', 'place')].append((transition_index, place_index))
-                data[('place', 'to', 'transition')].append((place_index, data['transitions'].index(target)))
+                
+                # Add the place to the data dict
+                data['nodes'].append(place_name)
+                data['node_x'].append(torch.tensor([1.0]))
+                data['node_types'].append("place")
+                data['labels'].append(-1)
+                
+                # Add an edge from the source to the place
+                source_index = data['nodes'].index(source)
+                place_index = data['nodes'].index(place_name)
+                data['edges'].append((source_index, place_index))
+                
+                # Add an edge from the place to the target
+                target_index = data['nodes'].index(target)
+                data['edges'].append((place_index, target_index))
         
         return data
     
@@ -147,123 +154,128 @@ class GraphBuilder:
         This method creates a new place if two or more one-to-one places share the same target
         and if all relations between the sources and target are parallel ('||').
         """
-        # find all the places in the data dict that have the same target 
-        places_with_same_source = {} # {source: [target1, target2, ...]} all activites
-        for arc in data[('place', 'to', 'transition')]:
-            target_transition_index = arc[1]
-            target_transition = data['transitions'][target_transition_index]
-            source_candidate_index = arc[0]
-            source_candidate = data['candidate_places'][source_candidate_index]
+        # Find all places in the data dict / as indicies
+        places = [i for i, node in enumerate(data['nodes']) if data['node_types'][i] == "place"]
+        
+        same_source_dict = {} # {source: [target1, target2, ...]}
+        same_target_dict = {} # {target: [source1, source2, ...]}
+        
+        for place in places:
+            # Find all transitions that have an outgoing edge to the place
+            source_transition = [edge[0] for edge in data['edges'] if edge[1] == place][0]
             
-            # find the transition that corresponds to the source candidate
-            source_transition_index = data['transitions'].index(source_candidate.split("->")[0])
-            source_transition = data['transitions'][source_transition_index]
+            # Find the target transition of the place
+            target_transition = [edge[1] for edge in data['edges'] if edge[0] == place][0]
             
-            if source_transition not in places_with_same_source:
-                places_with_same_source[source_transition] = []
-            places_with_same_source[source_transition].append(target_transition)
+            if not target_transition in same_target_dict.keys():
+                same_target_dict[target_transition] = []
+            same_target_dict[target_transition].append(source_transition)
             
+            if not source_transition in same_source_dict.keys():
+                same_source_dict[source_transition] = []
+            same_source_dict[source_transition].append(target_transition)
             
         footprint_matrix = eventlog.get_footprint_matrix()
-        print(f"Places with the same target: {places_with_same_source}")
-        # check if the same source transitions have the same target transition
-        for source_transition, target_transitions in places_with_same_source.items():
+        
+        # One to many with the same_source_dict
+        for source_transition, target_transitions in same_source_dict.items():
             if len(target_transitions) > 1:
-                # check if all the source transitions have the same target transition
-                targets = target_transitions
-                source = source_transition
-                # check if all the source transitions have the same target transition
-                all_parallel = True
-                for target in targets:
-                    for target1 in targets:
-                        if target != target1:
-                            if footprint_matrix[(target, target1)] != '||' and footprint_matrix[(target1, target)] != '#':
-                                all_parallel = False
+                
+                
+                # check if all the target transistion have # or || relation
+                all_parallel_or_choice = True
+                for target_transition in target_transitions:
+                    for target_transition1 in target_transitions:
+                        if target_transition != target_transition1:
+                            if footprint_matrix[(data['nodes'][target_transition], data['nodes'][target_transition1])] != '||' and footprint_matrix[(data['nodes'][target_transition1], data['nodes'][target_transition])] != '#':
+                                all_parallel_or_choice = False
                                 break
-                if all_parallel:
-                    # Create a new place
-                    place_name = f"{source}->"
-                    for target in targets:
-                        place_name += f"{target},"
-                    place_name = place_name[:-1]
-                    data['candidate_places'].append(place_name)
-                    data['candidate_places_x'].append(torch.tensor([1.0]))
-                    
-                    # add an edge from the transition to the place
-                    source_index = data['transitions'].index(source)
-                    place_index = data['candidate_places'].index(place_name)
-                    data[('transition', 'to', 'place')].append((source_index, place_index))
-                    
-                    # add an edge from the place to all the target transitions
-                    for target in targets:
-                        target_index = data['transitions'].index(target)
-                        data[('place', 'to', 'transition')].append((place_index, target_index))
-
+                
+                if not all_parallel_or_choice:
+                    continue
+                
+                # calculate the node name
+                place_name = f"{data['nodes'][source_transition]}->"
+                for target_transition in target_transitions:
+                    place_name += f"{data['nodes'][target_transition]},"
+                place_name = place_name[:-1]
+                
+                # add the place to the nodes
+                data['nodes'].append(place_name)
+                data['node_x'].append(torch.tensor([1.0]))
+                data['node_types'].append("place")
+                data['labels'].append(-1)
+                
+                # Add the edges from the source transistion to the place and from the place to the target transitions
+                data['edges'].append((source_transition, data['nodes'].index(place_name)))
+                for target_transition in target_transitions:
+                    data['edges'].append((data['nodes'].index(place_name), target_transition))
+                
+        
+        # One to many with the same_target_dict
+        for target_transition, source_transitions in same_target_dict.items():
+            if len(source_transitions) > 1:
+                
+                # check if all the source transistion have # or || relation
+                all_parallel_or_choice = True
+                for source_transition in source_transitions:
+                    for source_transition1 in source_transitions:
+                        if source_transition != source_transition1:
+                            if footprint_matrix[(data['nodes'][source_transition], data['nodes'][source_transition1])] != '||' and footprint_matrix[(data['nodes'][source_transition1], data['nodes'][source_transition])] != '#':
+                                all_parallel_or_choice = False
+                                break
+                if not all_parallel_or_choice:
+                    continue
+                
+                # calculate the node name
+                place_name = f""
+                for source_transition in source_transitions:
+                    place_name += f"{data['nodes'][source_transition]},"
+                place_name = place_name[:-1] 
+                place_name += f"->{data['nodes'][target_transition]}"
+                
+                # add the place to the nodes
+                data['nodes'].append(place_name)
+                data['node_x'].append(torch.tensor([1.0]))
+                data['node_types'].append("place")
+                data['labels'].append(-1)
+                
+                # Add the edges from the source transistion to the place and from the place to the target transitions
+                for source in source_transitions:
+                    data['edges'].append((source, data['nodes'].index(place_name)))
+                data['edges'].append((data['nodes'].index(place_name), target_transition))
+                
                     
         return data
              
-    def add_many_to_one_candidate_places(self, data: dict, eventlog: EventLog):
-        """ Add many-to-one candidate places to the Petri net graph based on the event log """
-        # find all the places in the data dict that have the same target 
-        places_with_same_target = {} # {target: [source1, source2, ...]} all activites
-        for arc in data[('transition', 'to', 'place')]:
-            source_transition_index = arc[0]
-            source_transition = data['transitions'][source_transition_index]
-            target_candidate_index = arc[1]
-            target_candidate = data['candidate_places'][target_candidate_index]
-            
-            # check the name of the target candidate if it has more than one source by checking if it follows the pattern "source->target"
-            if target_candidate.split("->")[1] not in data['transitions']:
-                continue
-            
-            
-            # find the transition that corresponds to the source candidate
-            target_transition_index = data['transitions'].index(target_candidate.split("->")[1])
-            target_transition = data['transitions'][target_transition_index]
-            
-            if target_transition not in places_with_same_target:
-                places_with_same_target[target_transition] = []
-            places_with_same_target[target_transition].append(source_transition)
-            
-            
-        footprint_matrix = eventlog.get_footprint_matrix()
-        print(f"Places with the same target: {places_with_same_target}")
-        # check if the same source transitions have the same target transition
-        for source_transition, target_transitions in places_with_same_target.items():
-            if len(target_transitions) > 1:
-                # check if all the source transitions have the same target transition
-                targets = target_transitions
-                source = source_transition
-                # check if all the source transitions have the same target transition
-                all_parallel = True
-                for target in targets:
-                    for target1 in targets:
-                        if target != target1:
-                            if footprint_matrix[(target, target1)] != '||' and footprint_matrix[(target1, target)] != '#':
-                                all_parallel = False
-                                break
-                if all_parallel:
-                    # Create a new place
-                    place_name = f"{source}->"
-                    for target in targets:
-                        place_name += f"{target},"
-                    place_name = place_name[:-1]
-                    data['candidate_places'].append(place_name)
-                    data['candidate_places_x'].append(torch.tensor([1.0]))
-                    
-                    # add an edge from the transition to the place
-                    source_index = data['transitions'].index(source)
-                    place_index = data['candidate_places'].index(place_name)
-                    data[('transition', 'to', 'place')].append((source_index, place_index))
-                    
-                    # add an edge from the place to all the target transitions
-                    for target in targets:
-                        target_index = data['transitions'].index(target)
-                        data[('place', 'to', 'transition')].append((place_index, target_index))
-
-                    
-        return data
-    
     def add_many_to_many_candidate_places(self, data: dict, eventlog: EventLog):
         """ Add many-to-many candidate places to the Petri net graph based on the event log """
         return data
+    
+    def annotate_petrinet_graph (self, graph: Data, petrinet: PetriNet):
+        """
+        Annotate the graph with the petrinet information populates the labels of the nodes and edges of the graph with the 1, 0, -1 values. 
+        1 if the node is a true place, 0 if the node is not a true place, -1 if the node is a transition.
+        """
+        
+        place_mask = [i for i, node in enumerate(graph['nodes']) if graph['node_types'][i] == "place"]
+        
+        # for each place in the graph, check if it is a true place or not
+        for i in place_mask:
+            graph_place = graph['nodes'][i]
+            graph_ingoing_edges = graph['edge_index'][0][graph['edge_index'][1] == i]
+            graph_outgoing_edges = graph['edge_index'][1][graph['edge_index'][0] == i]
+            
+            
+            ingoing_transitions = [graph['nodes'][j] for j in graph_ingoing_edges if graph['node_types'][j] == "transition"]
+            outgoing_transitions = [graph['nodes'][j] for j in graph_outgoing_edges if graph['node_types'][j] == "transition"]
+            
+            is_place = petrinet.is_place(ingoing_transitions, outgoing_transitions)
+            
+            if is_place:
+                graph['labels'][i] = 1
+            else:
+                graph['labels'][i] = 0
+            
+        return graph
+        

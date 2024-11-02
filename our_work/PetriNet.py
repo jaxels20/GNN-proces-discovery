@@ -72,6 +72,8 @@ class Arc:
         self.target = target
         self.weight = weight
 
+    def __repr__(self):
+        return f"Arc({self.source} -> {self.target}, weight={self.weight})"
 
 class PetriNet:
     """
@@ -386,3 +388,29 @@ class PetriNet:
             reset_petri_net()
 
         return EventLog.from_trace_list(event_log)
+    
+    def is_place(self, graph_in_going_transitions, graph_out_going_transitions):
+        """
+        Check if the place is a true place, supporting one-to-one, one-to-many, and many-to-many relationships.
+
+        Parameters:
+        ----------
+        in_going_transitions : list[str]
+            List of activity names representing incoming transitions to the place.
+        out_going_transitions : list[str]
+            List of activity names representing outgoing transitions from the place.
+
+        Returns:
+        -------
+        bool
+            True if every `in_going_transitions` is connected to every `out_going_activity` through the place,
+            False otherwise.
+        """
+        for place in self.places:
+            in_going_transitions_for_place = [arc.source for arc in self.arcs if arc.target == place.name]
+            out_going_transitions_for_place = [arc.target for arc in self.arcs if arc.source == place.name]
+            if set(in_going_transitions_for_place) == set(graph_in_going_transitions) and set(out_going_transitions_for_place) == set(graph_out_going_transitions):
+                return True
+
+        return False
+            

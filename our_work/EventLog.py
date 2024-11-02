@@ -298,43 +298,70 @@ class EventLog:
 
         return pm4py_event_log
 
-    def get_footprint_matrix(self):
+    def get_footprint_matrix(self, length: int = 1) -> dict:
         """
-        Calculate the footprint matrix for the event log and return it in the form:
+        Calculate the footprint matrix for the event log considering eventual succession
+        within a specified length. Returns a dictionary in the form:
         {('B', 'A'): '>', ('B', 'C'): '||'...}
 
+        Parameters:
+        ----------
+        length : int
+            The maximum number of steps allowed between two activities to consider them in succession.
+
         Returns:
-        --------
-        dict:
+        -------
+        dict
             A dictionary where keys are tuples representing pairs of activities ('A', 'B')
             and values are the relations ('>', '||', '#').
         """
-        # Step 1: Initialize a defaultdict for direct succession relationships
-        direct_succession = defaultdict(set)
+        # Step 1: Initialize a dictionary for direct succession relationships with eventual following
         all_activities = self.get_all_activities()
-
-        # Step 2: Collect all direct succession relationships from the traces
-        for trace in self.traces:
-            for i in range(len(trace.events) - 1):
-                current_activity = trace.events[i].activity
-                next_activity = trace.events[i + 1].activity
-                direct_succession[current_activity].add(next_activity)
-
-        # Step 3: Initialize the footprint matrix as a dictionary of tuples
         footprint_matrix = {}
 
-        # Step 4: Fill the footprint matrix based on direct succession and reverse relations
+        # Step 2: Fill the footprint matrix based on eventual succession relationships
         for activity_a in all_activities:
             for activity_b in all_activities:
                 pair_key = (activity_a, activity_b)
-                if activity_b in direct_succession[activity_a]:
-                    if activity_a in direct_succession[activity_b]:
+
+                if self.does_eventually_follows(activity_a, activity_b, length):
+                    if self.does_eventually_follows(activity_b, activity_a, length):
                         footprint_matrix[pair_key] = '||'  # Parallel relation
                     else:
                         footprint_matrix[pair_key] = '>'  # A → B (causal relation)
-                # elif activity_a in direct_succession[activity_b]:
-                #     footprint_matrix[pair_key] = '<'  # B → A (reverse causal relation)
+                elif self.does_eventually_follows(activity_b, activity_a, length):
+                    footprint_matrix[pair_key] = '<'  # B → A (reverse causal relation)
                 else:
                     footprint_matrix[pair_key] = '#'  # No direct relation
 
         return footprint_matrix
+    
+    def does_eventually_follows(self, activity_a: str, activity_b: str, length: int = 1) -> bool:
+        """
+        Check if `activity_a` is eventually followed by `activity_b` within `length` steps
+        in any trace in the event log.
+
+        Parameters:
+        ----------
+        activity_a : str
+            The activity to check if it is followed by `activity_b`.
+        activity_b : str
+            The activity that should follow `activity_a`.
+        length : int
+            The maximum number of steps allowed between `activity_a` and `activity_b`.
+
+        Returns:
+        -------
+        bool
+            True if `activity_a` is eventually followed by `activity_b` within `length` steps
+            in any trace, False otherwise.
+        """
+        for trace in self.traces:
+            for i, event in enumerate(trace.events):
+                if event.activity == activity_a:
+                    # Check if `activity_b` appears within the next `length` events
+                    for j in range(1, length + 1):
+                        if i + j < len(trace.events) and trace.events[i + j].activity == activity_b:
+                            return True
+        return False
+        

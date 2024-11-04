@@ -305,14 +305,16 @@ class GraphBuilder:
         
         return data
     
-    def set_combinations(self, transitions: list):
+    @staticmethod
+    def set_combinations(transitions: list):
         """ Set the combinations of sources or targets """
         set_combinations = []
         for i in range(2, len(transitions) + 1):
             set_combinations.extend(combinations(transitions, i))
         return set_combinations
     
-    def check_parallel_or_choice(self, data, footprint_matrix: dict, transitions: list):
+    @staticmethod
+    def check_parallel_or_choice(data, footprint_matrix: dict, transitions: list):
         """ Check if the relation between source and target is parallel ('||') or choice ('#') """
         for i, t in enumerate(transitions, 0):
             for t2 in transitions[i + 1:]:
@@ -321,37 +323,38 @@ class GraphBuilder:
                     return False
         return True
     
-    def construct_place_name(self, data, sources, targets):
+    @staticmethod
+    def construct_place_name(data, sources, targets):
         """ Construct the name of the place based on the source and target transitions """
         place_name = ",".join(data['nodes'][activity] for activity in sources)
         place_name += "->" + ",".join(data['nodes'][activity] for activity in targets)
         return place_name
     
-    def add_place_node(self, data, place_name):
+    @staticmethod
+    def add_place_node(data, place_name):
         """ Add a place node to the data dict"""
         data['nodes'].append(place_name)
         data['node_x'].append(torch.tensor([1.0]))
         data['node_types'].append("place")
         data['labels'].append(-1)
-        
-    def add_edges(self, place_name: str, data, sources: list, targets: list):
+    
+    @staticmethod
+    def add_edges(place_name: str, data, sources: list, targets: list):
         """Adds edges between candidate place and source/target transitions"""
         place_index = data['nodes'].index(place_name)
         for source in sources:
             data['edges'].append((source, place_index))
         for target in targets:
             data['edges'].append((place_index, target))
-            
-    def annotate_petrinet_graph(self, graph: Data, petrinet: PetriNet):
+    
+    @staticmethod
+    def annotate_petrinet_graph(graph: Data, petrinet: PetriNet):
         """
         Annotate the graph with the petrinet information populates the labels of the nodes and edges of the graph with the 1, 0, -1 values. 
         1 if the node is a true place, 0 if the node is not a true place, -1 if the node is a transition.
         """
-        
-        
         # for each place in the graph, check if it is a true place or not
         for i in graph['place_mask'].nonzero(as_tuple=True)[0]:
-            graph_place = graph['nodes'][i]
             graph_ingoing_edges = graph['edge_index'][0][graph['edge_index'][1] == i]
             graph_outgoing_edges = graph['edge_index'][1][graph['edge_index'][0] == i]
             

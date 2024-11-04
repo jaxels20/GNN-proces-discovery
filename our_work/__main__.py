@@ -23,6 +23,7 @@ if __name__ == "__main__":
     ]
     pn = PetriNet(places, transitions, archs)
     # pn.visualize("./example/many_to_many")
+    # pn = PetriNet.from_ptml('example/toy_pn.ptml')
 
     gb = GraphBuilder()
     graph = gb.build_petrinet_graph(eventlog)

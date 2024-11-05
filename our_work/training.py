@@ -7,8 +7,8 @@ from models import GraphSAGEModel
 import torch
 
 if __name__ == "__main__":
-    log_file_name = "./example/data.xes"
-    pn_file_name = "./example/toy_pn.ptml"
+    log_file_name = "./example/many_to_many.xes"
+    pn_file_name = "./example/many_to_many.ptml"
     eventlog = EventLog.load_xes(log_file_name)
     pn = PetriNet.from_ptml(pn_file_name)
     

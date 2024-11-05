@@ -10,7 +10,7 @@ from itertools import combinations
 
 class GraphBuilder:
     def __init__(self):
-        pass
+        self.foot_print_matrix = None
     
     def build_petrinet_graph(self, eventlog: EventLog):
         """ Build a Petri net graph from an event log """
@@ -31,11 +31,15 @@ class GraphBuilder:
         # Correct the edge index format
         graph.edge_index = torch.tensor(data['edges'], dtype=torch.long).t().contiguous()
         
-        # Populate the selected_nodes attribute with 0 for all nodes
-        graph['selected_nodes'] = torch.zeros(len(graph['node_x']), dtype=torch.bool)
         
         # Create a mask for the place nodes
         graph['place_mask'] = torch.tensor([nt == 'place' for nt in graph['node_types']], dtype=torch.bool)
+        # Populate the selected_nodes attribute with 0 for all nodes
+        graph['selected_nodes'] = torch.zeros(len(graph['node_x']), dtype=torch.bool)
+        
+        # mark all transitions as 1 in the selected_nodes attribute use the place_mask to select only transitions
+        graph['selected_nodes'][~graph['place_mask']] = 1
+        
         
         # Convert all attributes to PyTorch tensors
         graph = self._attributes_to_tensor(graph)
@@ -57,6 +61,8 @@ class GraphBuilder:
     def _add_transition_nodes(self, data: dict, eventlog: EventLog):
         """ Add all activities as transition nodes in the graph. """
         for activity in eventlog.get_all_activities():
+            
+            
             data['nodes'].append(activity)
             data['node_x'].append(torch.tensor([1.0]))  # Transition feature
             data['node_types'].append("transition")

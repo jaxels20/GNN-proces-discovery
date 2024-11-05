@@ -12,8 +12,9 @@ class GraphBuilder:
     def __init__(self, eventlog: EventLog, length=1):
         self.eventually_follows_param = length
         self.footprint_matrix = eventlog.get_footprint_matrix(self.eventually_follows_param)
+        self.eventlog = eventlog
     
-    def build_petrinet_graph(self, eventlog: EventLog):
+    def build_petrinet_graph(self):
         """ Build a Petri net graph from an event log """
         
         # Initialize graph data structure
@@ -21,10 +22,10 @@ class GraphBuilder:
         
         data = self._initialize_graph_data()
         
-        data = self._add_transition_nodes(data, eventlog)
+        data = self._add_transition_nodes(data)
 
         # add candidate places
-        data = self.add_candidate_places(data, eventlog)
+        data = self.add_candidate_places(data)
         
         # Assign data to the graph
         graph = self._assign_data_to_graph(data)
@@ -59,11 +60,11 @@ class GraphBuilder:
             'place_mask': torch.tensor([], dtype=torch.bool)
         }
 
-    def _add_transition_nodes(self, data: dict, eventlog: EventLog):
+    def _add_transition_nodes(self, data: dict):
         """ Add all activities as transition nodes in the graph. """
         alpha_relation_map = {'#': 0, '>': 1, '<': 1, '||': 2}
         
-        for activity in eventlog.get_all_activities():
+        for activity in self.eventlog.get_all_activities():
             data['nodes'].append(activity)
             data['node_types'].append("transition")
             data['labels'].append(-1)
@@ -71,7 +72,7 @@ class GraphBuilder:
             # Node feature - use column from the footprint matrix. choice=0, parallel=1, eventually follows=2
             alpha_relations = [
                 alpha_relation_map.get(self.footprint_matrix[(activity, target)])
-                for target in eventlog.get_all_activities()
+                for target in self.eventlog.get_all_activities()
             ]
             alpha_relations += [0] * (64 - len(alpha_relations))   # pad remaining entries with 0
             data['node_x'].append(torch.tensor(alpha_relations, dtype=torch.float))
@@ -165,14 +166,14 @@ class GraphBuilder:
         plt.title("Graph Visualization with Node Names")
         plt.show()
     
-    def add_candidate_places(self, data: dict, eventlog: EventLog):
+    def add_candidate_places(self, data: dict):
         """ Add candidate places to the Petri net graph based on the event log """
-        data = self.add_one_to_one_candidate_places(data, eventlog)
-        data = self.add_one_to_many_candidate_places(data, eventlog)
-        data = self.add_many_to_many_candidate_places(data, eventlog)
+        data = self.add_one_to_one_candidate_places(data)
+        data = self.add_one_to_many_candidate_places(data)
+        data = self.add_many_to_many_candidate_places(data)
         return data
     
-    def add_one_to_one_candidate_places(self, data: dict, eventlog: EventLog):
+    def add_one_to_one_candidate_places(self, data: dict):
         """ Add one-to-one candidate places to the Petri net graph based on the event log 
             This methods create a new place for each pair of activities that has a eventually follows relation in the event log.
         """
@@ -197,7 +198,7 @@ class GraphBuilder:
         
         return data
     
-    def add_one_to_many_candidate_places(self, data: dict, eventlog: EventLog):
+    def add_one_to_many_candidate_places(self, data: dict):
         """Add one-to-many candidate places to the Petri net graph based on the event log.
         This method creates a new place if two or more one-to-one places share the same target
         and if all relations between the sources and target are parallel ('||') or choice ('#').
@@ -259,7 +260,7 @@ class GraphBuilder:
                     
         return data
 
-    def add_many_to_many_candidate_places(self, data: dict, eventlog: EventLog):
+    def add_many_to_many_candidate_places(self, data: dict):
         """ Add many-to-many candidate places to the Petri net graph based on the event log """
         
         places = [i for i, _ in enumerate(data['nodes']) if data['node_types'][i] == "place"]

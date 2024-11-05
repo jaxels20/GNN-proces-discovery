@@ -41,6 +41,8 @@ class Place:
             )
         self.tokens -= count
 
+    def __repr__(self):
+        return f"Place({self.name}, tokens={self.tokens})"
 
 class Transition:
     """
@@ -55,6 +57,8 @@ class Transition:
     def __init__(self, name: str):
         self.name = name
 
+    def __repr__(self):
+        return f"Transition({self.name})"
 
 class Arc:
     """
@@ -77,6 +81,7 @@ class Arc:
 
     def __repr__(self):
         return f"Arc({self.source} -> {self.target}, weight={self.weight})"
+
 
 class PetriNet:
     """
@@ -213,13 +218,13 @@ class PetriNet:
         print(f"Petri net saved as {output_path}")
 
     def get_start_place(self):
-        """Return the start place (no incoming arcs), or None if none exists."""
+        """Return the start places (no incoming arcs), or None if none exists."""
         for place in self.places:
             incoming_arcs = [arc for arc in self.arcs if arc.target == place.name]
             if len(incoming_arcs) == 0:
-                return place
+                return place        
         return None
-
+ 
     def get_end_place(self):
         """Return the end place (no outgoing arcs), or None if none exists."""
         for place in self.places:
@@ -227,6 +232,37 @@ class PetriNet:
             if len(outgoing_arcs) == 0:
                 return place
         return None
+
+    def construct_start_place(self):    
+        """Construct a start place with no incoming arcs. Use all the transitions that has no incoming arcs."""
+        # check if a start place already exists
+        for place in self.places:
+            incoming_arcs = [arc for arc in self.arcs if arc.target == place.name]
+            if len(incoming_arcs) == 0:
+                raise ValueError("Start place already exists")
+        
+        start_place = Place('start')
+        start_place.tokens = 1
+        self.places.append(start_place)
+        for transition in self.transitions:
+            incoming_arcs = [arc for arc in self.arcs if arc.target == transition.name]
+            if len(incoming_arcs) == 0:
+                self.arcs.append(Arc(start_place.name, transition.name))
+        
+    def construct_end_place(self):
+        """Construct an end place with no outgoing arcs. Use all the transitions that has no outgoing arcs."""
+        # check if an end place already exists
+        for place in self.places:
+            outgoing_arcs = [arc for arc in self.arcs if arc.source == place.name]
+            if len(outgoing_arcs) == 0:
+                raise ValueError("End place already exists")
+        
+        end_place = Place('end')
+        self.places.append(end_place)
+        for transition in self.transitions:
+            outgoing_arcs = [arc for arc in self.arcs if arc.source == transition.name]
+            if len(outgoing_arcs) == 0:
+                self.arcs.append(Arc(transition.name, end_place.name))
 
     def to_pm4py(self):
         """Convert our Petri net class to a pm4py Petri net and return it"""
@@ -425,6 +461,57 @@ class PetriNet:
         print(f"Petri net saved as {filename}")
 
     @staticmethod
-    def from_graph(self, graph: Data):
-        "Construct a Petri net from a graph object"
-        raise NotImplementedError("Method not implemented yet")
+    def from_graph(graph):
+        """
+        Populate the Petri net from a PyTorch Geometric graph, considering only selected nodes.
+
+        Parameters:
+        -----------
+        graph : PyTorch Geometric Data
+            The graph containing nodes, edges, node attributes, and selected nodes.
+        """
+        pn = PetriNet()
+        # Extract the necessary data
+        node_names = graph['nodes']
+        node_types = graph['node_types']
+        edge_index = graph['edge_index']
+        selected_nodes = graph['selected_nodes']
+
+        # Create Place and Transition objects only for selected nodes
+        node_map = {}  # A map from node index to Place or Transition object
+
+        for i, (name, is_selected) in enumerate(zip(node_names, selected_nodes)):
+            if not is_selected:
+                continue  # Skip non-selected nodes
+
+            if node_types[i] == 'place':  # Node is a place
+                place = Place(name)
+                pn.places.append(place)
+                node_map[i] = place
+            elif node_types[i] == 'transition':  # Node is a transition
+                transition = Transition(name)
+                pn.transitions.append(transition)
+                node_map[i] = transition
+
+        # Create Arc objects for edges that connect selected nodes
+        for src, dst in edge_index.t().tolist():
+            if src in node_map and dst in node_map:
+                source = node_map[src]
+                target = node_map[dst]
+
+                # Determine direction of the arc
+                if isinstance(source, Place) and isinstance(target, Transition):
+                    arc = Arc(source.name, target.name)   
+                elif isinstance(source, Transition) and isinstance(target, Place):
+                    arc = Arc(source.name, target.name)
+                else:
+                    # Skip any edges that don't fit the Place-Transition or Transition-Place pattern
+                    continue
+
+                pn.arcs.append(arc)
+                
+        # add a start and end place 
+        pn.construct_start_place()
+        pn.construct_end_place()        
+        
+        return pn

@@ -2,7 +2,8 @@ from EventLog import EventLog
 from GraphBuilder import GraphBuilder
 from PetriNet import PetriNet, Place, Transition, Arc
 
-from models import GraphSAGEModel
+from Models import GraphSAGEModel
+
 
 import torch
 
@@ -12,14 +13,13 @@ if __name__ == "__main__":
     eventlog = EventLog.load_xes(log_file_name)
     pn = PetriNet.from_ptml(pn_file_name)
     
-    gb = GraphBuilder()
-    graph = gb.build_petrinet_graph(eventlog)
+    gb = GraphBuilder(eventlog=eventlog)
+    graph = gb.build_petrinet_graph()
     
     graph = gb.annotate_petrinet_graph(graph, pn)
     
-    
     # Instantiate model, optimizer, and loss function
-    model = GraphSAGEModel(input_dim=1, hidden_dim=16, output_dim=2)
+    model = GraphSAGEModel(input_dim=64, hidden_dim=16, output_dim=2)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     criterion = torch.nn.CrossEntropyLoss()
 
@@ -40,6 +40,7 @@ if __name__ == "__main__":
         
         if epoch % 10 == 0:
             print(f"Epoch {epoch}, Loss: {loss.item()}")
+            
 
 
 

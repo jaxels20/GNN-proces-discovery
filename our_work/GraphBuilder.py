@@ -91,7 +91,7 @@ class GraphBuilder:
         # data['node_x'] = torch.tensor(data['node_x'], dtype=torch.float)
         # reformat node_x to be a tensor of shape (num_nodes, 64)
         data['node_x'] = torch.stack(data['node_x'])
-        data['labels'] = torch.tensor(data['labels'], dtype=torch.long)
+        data['labels'] = torch.tensor(data['labels'], dtype=torch.float)
         data['selected_nodes'] = torch.tensor(data['selected_nodes'], dtype=torch.bool)
         data['place_mask'] = torch.tensor(data['place_mask'], dtype=torch.bool)
         
@@ -374,9 +374,11 @@ class GraphBuilder:
             is_place = petrinet.is_place(ingoing_transitions, outgoing_transitions)
             
             if is_place:
-                graph['labels'][i] = 1
+                graph['labels'][i] = torch.tensor([1])
             else:
-                graph['labels'][i] = 0
-            
+                graph['labels'][i] = torch.tensor([0])
+
+        # unsqueeze the labels to match the shape [num_nodes, 1]
+        graph['labels'] = graph['labels'].unsqueeze(1)
         return graph
         

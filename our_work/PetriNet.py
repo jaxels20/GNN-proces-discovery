@@ -239,7 +239,7 @@ class PetriNet:
         for place in self.places:
             incoming_arcs = [arc for arc in self.arcs if arc.target == place.name]
             if len(incoming_arcs) == 0:
-                raise ValueError("Start place already exists")
+                continue
         
         start_place = Place('start')
         start_place.tokens = 1
@@ -255,7 +255,7 @@ class PetriNet:
         for place in self.places:
             outgoing_arcs = [arc for arc in self.arcs if arc.source == place.name]
             if len(outgoing_arcs) == 0:
-                raise ValueError("End place already exists")
+                continue
         
         end_place = Place('end')
         self.places.append(end_place)

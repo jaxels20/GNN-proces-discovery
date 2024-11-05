@@ -24,7 +24,6 @@ class Event:
     def __repr__(self):
         return f"Event(activity={self.activity}, timestamp={self.timestamp}, attributes={self.attributes})"
 
-
 class Trace:
     """
     Class representing a trace in the event log.
@@ -49,7 +48,6 @@ class Trace:
 
     def __repr__(self):
         return f"Trace(trace_id={self.trace_id}, events={len(self.events)})"
-
 
 class EventLog:
     """
@@ -364,4 +362,6 @@ class EventLog:
                         if i + j < len(trace.events) and trace.events[i + j].activity == activity_b:
                             return True
         return False
+    
+
         

@@ -2,7 +2,7 @@ from EventLog import EventLog
 from GraphBuilder import GraphBuilder
 from PetriNet import PetriNet, Place, Transition, Arc
 from PyProcTree.exposed_func import generate_logs, generate_process_trees
-from Evaluation import ModelLogEvaluator
+from Evaluator import ModelLogEvaluator
 if __name__ == "__main__":
     file_name = "./example/many_to_many.xes"
     eventlog = EventLog.load_xes(file_name)

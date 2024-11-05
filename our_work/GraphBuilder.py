@@ -9,8 +9,9 @@ from PetriNet import PetriNet
 from itertools import combinations
 
 class GraphBuilder:
-    def __init__(self):
-        self.foot_print_matrix = None
+    def __init__(self, eventlog: EventLog, length=1):
+        self.eventually_follows_param = length
+        self.footprint_matrix = eventlog.get_footprint_matrix(self.eventually_follows_param)
     
     def build_petrinet_graph(self, eventlog: EventLog):
         """ Build a Petri net graph from an event log """
@@ -60,13 +61,21 @@ class GraphBuilder:
 
     def _add_transition_nodes(self, data: dict, eventlog: EventLog):
         """ Add all activities as transition nodes in the graph. """
+        alpha_relation_map = {'#': 0, '>': 1, '<': 1, '||': 2}
+        
         for activity in eventlog.get_all_activities():
-            
-            
             data['nodes'].append(activity)
-            data['node_x'].append(torch.tensor([1.0]))  # Transition feature
             data['node_types'].append("transition")
-            data['labels'].append(-1)  # Label for transition nodes
+            data['labels'].append(-1)
+            
+            # Node feature - use column from the footprint matrix. choice=0, parallel=1, eventually follows=2
+            alpha_relations = [
+                alpha_relation_map.get(self.footprint_matrix[(activity, target)])
+                for target in eventlog.get_all_activities()
+            ]
+            alpha_relations += [0] * (64 - len(alpha_relations))   # pad remaining entries with 0
+            data['node_x'].append(torch.tensor(alpha_relations, dtype=torch.float))
+
         return data
 
     def _assign_data_to_graph(self, data: dict):
@@ -78,10 +87,9 @@ class GraphBuilder:
 
     def _attributes_to_tensor(self, data: Data):
         """ Convert attributes in the data dict to PyTorch tensors """
-        data['node_x'] = torch.tensor(data['node_x'], dtype=torch.float)
-        # and also reformat the x to be a tensor of shape (num_nodes, 1)
-        data['node_x'] = data['node_x'].unsqueeze(1)
-        
+        # data['node_x'] = torch.tensor(data['node_x'], dtype=torch.float)
+        # reformat node_x to be a tensor of shape (num_nodes, 64)
+        data['node_x'] = torch.stack(data['node_x'])
         data['labels'] = torch.tensor(data['labels'], dtype=torch.long)
         data['selected_nodes'] = torch.tensor(data['selected_nodes'], dtype=torch.bool)
         data['place_mask'] = torch.tensor(data['place_mask'], dtype=torch.bool)
@@ -168,16 +176,15 @@ class GraphBuilder:
         """ Add one-to-one candidate places to the Petri net graph based on the event log 
             This methods create a new place for each pair of activities that has a eventually follows relation in the event log.
         """
-        footprint_matrix = eventlog.get_footprint_matrix(length=1)
         # footprint matrix look like this {('B', 'A'): '<', ('B', 'C'): '||'}
-        for key, value in footprint_matrix.items():
+        for key, value in self.footprint_matrix.items():
             source, target = key[0], key[1]
             if value == ">":
                 # Create a new place
                 place_name = f"{source}->{target}"
                 
                 # Add the place to the data dict
-                self.add_place_node(data, place_name)
+                self._add_place_node(data, place_name)
                 
                 # Add an edge from the source to the place
                 source_index = data['nodes'].index(source)
@@ -221,37 +228,34 @@ class GraphBuilder:
                 target_transition = outgoing_edges[place][0]
                 same_target_dict.setdefault(target_transition, []).append(source_transition)
                 same_source_dict.setdefault(source_transition, []).append(target_transition)
-            
-        footprint_matrix = eventlog.get_footprint_matrix()
         
         # One to many with the same_source_dict
         for source_transition, target_transitions in same_source_dict.items():
             if len(target_transitions) > 1:
-                for transition_combination in self.set_combinations(target_transitions):
+                for transition_combination in self._set_combinations(target_transitions):
                     # check if all the target transistion have # or || relation
-                    all_parallel_or_choice = self.check_parallel_or_choice(data, footprint_matrix, transition_combination) 
+                    all_parallel_or_choice = self._is_parallel_or_choice(data, self.footprint_matrix, transition_combination) 
                     if not all_parallel_or_choice:
                         continue
                     
                     # add candidate to petri net
-                    place_name = self.construct_place_name(data, [source_transition], transition_combination)
-                    self.add_place_node(data, place_name)
-                    self.add_edges(place_name, data, [source_transition], transition_combination)
-                
+                    place_name = self._construct_place_name(data, [source_transition], transition_combination)
+                    self._add_place_node(data, place_name)
+                    self._add_edges(place_name, data, [source_transition], transition_combination)
         
         # Many to one with the same_target_dict
         for target_transition, source_transitions in same_target_dict.items():
             if len(source_transitions) > 1:
-                for transition_combination in self.set_combinations(source_transitions):
+                for transition_combination in self._set_combinations(source_transitions):
                     # check if all the target transistion have # or || relation
-                    all_parallel_or_choice = self.check_parallel_or_choice(data, footprint_matrix, transition_combination) 
+                    all_parallel_or_choice = self._is_parallel_or_choice(data, self.footprint_matrix, transition_combination) 
                     if not all_parallel_or_choice:
                         continue
                     
                     # add candidate to petri net
-                    place_name = self.construct_place_name(data, transition_combination, [target_transition])
-                    self.add_place_node(data, place_name)
-                    self.add_edges(place_name, data, transition_combination, [target_transition])
+                    place_name = self._construct_place_name(data, transition_combination, [target_transition])
+                    self._add_place_node(data, place_name)
+                    self._add_edges(place_name, data, transition_combination, [target_transition])
                     
         return data
 
@@ -300,19 +304,18 @@ class GraphBuilder:
                 seen_candidates.add((frozenset(matching_sources), target_set))
         
         # Check relations and create places for valid subsets
-        footprint_matrix = eventlog.get_footprint_matrix()
         for sources, targets in candidate_many_to_many_places:
-            for transition_combination in self.set_combinations(sources):
-                if self.check_parallel_or_choice(data, footprint_matrix, transition_combination):
+            for transition_combination in self._set_combinations(sources):
+                if self._is_parallel_or_choice(data, self.footprint_matrix, transition_combination):
                     # Construct and add the place node and edges
-                    place_name = self.construct_place_name(data, transition_combination, targets)
-                    self.add_place_node(data, place_name)
-                    self.add_edges(place_name, data, transition_combination, targets)
+                    place_name = self._construct_place_name(data, transition_combination, targets)
+                    self._add_place_node(data, place_name)
+                    self._add_edges(place_name, data, transition_combination, targets)
         
         return data
     
     @staticmethod
-    def set_combinations(transitions: list):
+    def _set_combinations(transitions: list):
         """ Set the combinations of sources or targets """
         set_combinations = []
         for i in range(2, len(transitions) + 1):
@@ -320,7 +323,7 @@ class GraphBuilder:
         return set_combinations
     
     @staticmethod
-    def check_parallel_or_choice(data, footprint_matrix: dict, transitions: list):
+    def _is_parallel_or_choice(data, footprint_matrix: dict, transitions: list):
         """ Check if the relation between source and target is parallel ('||') or choice ('#') """
         for i, t in enumerate(transitions, 0):
             for t2 in transitions[i + 1:]:
@@ -330,22 +333,22 @@ class GraphBuilder:
         return True
     
     @staticmethod
-    def construct_place_name(data, sources, targets):
+    def _construct_place_name(data, sources, targets):
         """ Construct the name of the place based on the source and target transitions """
         place_name = ",".join(data['nodes'][activity] for activity in sources)
         place_name += "->" + ",".join(data['nodes'][activity] for activity in targets)
         return place_name
     
     @staticmethod
-    def add_place_node(data, place_name):
+    def _add_place_node(data, place_name):
         """ Add a place node to the data dict"""
         data['nodes'].append(place_name)
-        data['node_x'].append(torch.tensor([1.0]))
+        data['node_x'].append(torch.zeros(64))
         data['node_types'].append("place")
         data['labels'].append(-1)
     
     @staticmethod
-    def add_edges(place_name: str, data, sources: list, targets: list):
+    def _add_edges(place_name: str, data, sources: list, targets: list):
         """Adds edges between candidate place and source/target transitions"""
         place_index = data['nodes'].index(place_name)
         for source in sources:

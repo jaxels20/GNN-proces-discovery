@@ -7,7 +7,7 @@ if __name__ == "__main__":
     
     # Create and evaluate the MultiEvaluator
     multi_evaluator = MultiEvaluator(all_eventlogs)
-    results_df = multi_evaluator.evaluate_all()
+    results_df = multi_evaluator.evaluate_all(output_png=True)
     results_df.to_csv("./results/results.csv")
     multi_evaluator.save_dataframe_to_pdf(results_df, "./results/results.pdf")
     

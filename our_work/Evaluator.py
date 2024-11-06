@@ -42,6 +42,7 @@ class SingleEvaluator:
     
     def get_replay_fitness(self):
         fitness = replay_fitness(self.event_log_pm4py, self.process_model_pm4py, self.init_marking, self.final_marking)
+        print(fitness)
         return fitness['percFitTraces']
     
     def get_precision(self):
@@ -66,7 +67,7 @@ class MultiEvaluator:
         self.petri_nets = {i: discover(event_logs[i]) for i in event_logs}
         self.event_logs = event_logs
 
-    def evaluate_all(self):
+    def evaluate_all(self, output_png=False):
         """
         Evaluate all Petri nets against their corresponding event logs and return a DataFrame.
         """
@@ -86,6 +87,11 @@ class MultiEvaluator:
                 
                 # Append the results
                 results.append(metrics)
+                
+                # Save the Petri net as a PNG file
+                if output_png:
+                    self.petri_nets[key].visualize(f"./results/{key}.png")
+                
             else:
                 print(f"No matching event log for Petri net with ID {key}")
 

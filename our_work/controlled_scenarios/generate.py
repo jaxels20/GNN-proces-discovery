@@ -3,12 +3,18 @@ This script will generate a set of controlled scenario cases for the process min
 out folder a ptml file and a xes file. the are coupled by the same name. Usage:
 python generate_controlled_scenario_cases.py --output_dir "
 """
+import sys
+import os
 
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
 
 from EventLog import EventLog
 from ToyDataGenerator import ToyDataGenerator
 from PetriNet import PetriNet, Transition, Place
-import os
+# append parent directory to path
+
+
 # TEST CASE 1: A simple sequence of activities
 def simple_sequence(output_dir: str) -> None:
     # Write Petrinet and XES file
@@ -177,6 +183,6 @@ if __name__ == "__main__":
     simple_sequence(output_dir)
     simple_xor_split(output_dir)
     simple_and_split(output_dir)
-    long_dependency(output_dir)
+    #long_dependency(output_dir)
     
     

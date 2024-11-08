@@ -69,7 +69,11 @@ def petri_net_fig(tree: ProcessTree):
     gviz.attr(
         rankdir='TB',
         size= f'{const.SINGLE_COL_FIG_WIDTH},{const.SINGLE_COL_FIG_HEIGHT}!',
-              )
+        dpi=str(const.DPI),
+        fontname=const.FONT_FAMILY,
+        fontsize=str(const.FONT_SIZE),
+        bgcolor='white'  # Or another color to match `plt.style`
+        )
     
     # Step 3: Save the Petri Net as a PDF
     gviz.render(filename=const.OUTPUT_DIR + 'petri_net', format='pdf', cleanup=True)

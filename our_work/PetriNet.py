@@ -124,9 +124,9 @@ class PetriNet:
     def add_arc(self, source: str, target: str, weight: int = 1):
         """Add an arc connecting a place and a transition or vice versa."""
         ids = [place.name for place in self.places] + [transition.name for transition in self.transitions]
-        if source.name not in ids:
+        if source not in ids:
             raise ValueError(f"Source '{source}' does not exist in the Petri net")
-        if target.name not in ids:
+        if target not in ids:
             raise ValueError(f"Target '{target}' does not exist in the Petri net")
         
         arc = Arc(source, target, weight)
@@ -459,7 +459,13 @@ class PetriNet:
         pt = convert_to_pt(pm4py_pn, init, end)
         write_ptml(pt, filename)
         print(f"Petri net saved as {filename}")
-
+    
+    def empty(self):
+        """Empty the Petri net."""
+        self.places = []
+        self.transitions = []
+        self.arcs = []
+      
     @staticmethod
     def from_graph(graph):
         """

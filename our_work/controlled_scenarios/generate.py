@@ -53,7 +53,6 @@ def simple_sequence(output_dir: str) -> None:
     petri_net.visualize(f"{output_dir}{sub_folder_name}petri_net")
     petri_net.to_ptml(f"{output_dir}{sub_folder_name}petri_net.ptml")
 
-
 # TEST CASE 2: A simple XOR split
 def simple_xor_split(output_dir: str) -> None:
     # Write Petrinet and XES file
@@ -131,10 +130,73 @@ def simple_and_split(output_dir: str) -> None:
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
 
 # TEST CASE 4: A simple loop of lenght 1
-
-
+def loop_lenght_1(output_dir: str) -> None:
+    
+    traces = ['ABBC', 'ABBBC', 'ABBBBC']
+    subfolder_name = "loop_lenght_1"
+    
+    #Check if the folder exists
+    os.makedirs(f"{output_dir}{subfolder_name}", exist_ok=True)
+    
+    ToyDataGenerator.traces_to_xes(traces, f"{output_dir}{subfolder_name}/eventlog.xes")
+    # Initialize a new Petri net
+    petri_net = PetriNet()
+    petri_net.empty()
+    
+    petri_net.add_transition("A")
+    petri_net.add_transition("B")
+    petri_net.add_transition("C")
+    
+    petri_net.add_place("Start", tokens=1)
+    petri_net.add_place("End")
+    petri_net.add_place("A->B,C")
+    
+    petri_net.add_arc("Start", "A")
+    petri_net.add_arc("A", "A->B,C")
+    petri_net.add_arc("A->B,C", "B")
+    petri_net.add_arc("B", "A->B,C")
+    petri_net.add_arc("A->B,C", "C")
+    petri_net.add_arc("C", "End")
+    
+    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
+    petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
+    
 # TEST CASE 5: A simple loop of lenght 2
-
+def loop_lenght_2(output_dir: str) -> None:
+        
+    traces = ['ABCD', 'ABCBCD', 'ABCBCBCD']
+    subfolder_name = "loop_lenght_2"
+    
+    #Check if the folder exists
+    os.makedirs(f"{output_dir}{subfolder_name}", exist_ok=True)
+    
+    ToyDataGenerator.traces_to_xes(traces, f"{output_dir}{subfolder_name}/eventlog.xes")
+    # Initialize a new Petri net
+    petri_net = PetriNet()
+    petri_net.empty()
+    
+    petri_net.add_transition("A")
+    petri_net.add_transition("B")
+    petri_net.add_transition("C")
+    petri_net.add_transition("D")
+    
+    petri_net.add_place("Start", tokens=1)
+    petri_net.add_place("End")
+    petri_net.add_place("A->B,D")
+    petri_net.add_place("B->C")
+    
+    petri_net.add_arc("Start", "A")
+    petri_net.add_arc("A", "A->B,D")
+    petri_net.add_arc("A->B,D", "B")
+    petri_net.add_arc("B", "B->C")
+    petri_net.add_arc("B->C", "C")
+    petri_net.add_arc("C", "A->B,D")
+    petri_net.add_arc("A->B,D", "D")
+    petri_net.add_arc("D", "End")
+    
+    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
+    petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
+    
 # TEST CASE 6: A long term dependency
 def long_dependency(output_dir: str) -> None:
     # Write Petrinet and XES file
@@ -188,14 +250,13 @@ def long_dependency(output_dir: str) -> None:
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
     
     
-
-
-
 if __name__ == "__main__":
     output_dir = "./controlled_scenarios/"
     simple_sequence(output_dir)
     simple_xor_split(output_dir)
     simple_and_split(output_dir)
-    long_dependency(output_dir)
+    loop_lenght_1(output_dir)
+    loop_lenght_2(output_dir)
+    #long_dependency(output_dir)
     
     

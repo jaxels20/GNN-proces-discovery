@@ -50,7 +50,7 @@ def simple_sequence(output_dir: str) -> None:
     petri_net.add_arc("B->C", "C")
     petri_net.add_arc("C", "End")
     
-    petri_net.visualize(f"{output_dir}{sub_folder_name}petri_net")
+    petri_net.visualize(f"{output_dir}{sub_folder_name}petri_net", report_ready=True)
     petri_net.to_ptml(f"{output_dir}{sub_folder_name}petri_net.ptml")
 
 # TEST CASE 2: A simple XOR split
@@ -84,7 +84,7 @@ def simple_xor_split(output_dir: str) -> None:
 
     
     
-    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
+    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net", report_ready=True)
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
     
 # TEST CASE 3: A simple AND split
@@ -126,7 +126,7 @@ def simple_and_split(output_dir: str) -> None:
     petri_net.add_arc("D", "End")
     
     
-    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
+    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net", report_ready=True)
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
 
 # TEST CASE 4: A simple loop of lenght 1
@@ -158,7 +158,7 @@ def loop_lenght_1(output_dir: str) -> None:
     petri_net.add_arc("A->B,C", "C")
     petri_net.add_arc("C", "End")
     
-    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
+    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net", report_ready=True)
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
     
 # TEST CASE 5: A simple loop of lenght 2
@@ -194,7 +194,7 @@ def loop_lenght_2(output_dir: str) -> None:
     petri_net.add_arc("A->B,D", "D")
     petri_net.add_arc("D", "End")
     
-    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
+    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net", report_ready=True)
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
     
 # TEST CASE 6: A long term dependency
@@ -206,7 +206,7 @@ def long_dependency(output_dir: str) -> None:
     #Check if the folder exists
     os.makedirs(f"{output_dir}{subfolder_name}", exist_ok=True)
     
-    ToyDataGenerator.traces_to_xes(traces, f"{output_dir}{subfolder_name}/eventlog.xes")
+    ToyDataGenerator.traces_to_xes(traces, f"{output_dir}{subfolder_name}/eventlog.xes, report_ready=True")
     # Initialize a new Petri net
     petri_net = PetriNet()
     petri_net.empty()

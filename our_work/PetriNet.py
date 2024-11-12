@@ -13,6 +13,13 @@ from pm4py.convert import convert_to_process_tree as convert_to_pt
 from torch_geometric.data import Data
 from copy import deepcopy
 
+import os
+import sys
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+import figure_generation.constants as constants
+
+
 class Place:
     """
     Class representing a place in a Petri net.
@@ -179,7 +186,7 @@ class PetriNet:
             output_place = self.get_place_by_name(arc.target)
             output_place.add_tokens(arc.weight)
 
-    def visualize(self, filename="petri_net", format="png"):
+    def visualize(self, filename="petri_net", format="pdf", report_ready=False):
         """
         Visualize the Petri net and save it as a PNG file using Graphviz.
 
@@ -189,32 +196,57 @@ class PetriNet:
             The base filename for the output file (without extension).
         format : str
             The format for the output file (e.g., 'png', 'pdf').
+        
+        report_ready : bool
+            If True, it makes the visualization more suitable for reports.
         """
         dot = Digraph(comment="Petri Net", format=format)
+        
+        if report_ready:
+            dot.attr(rankdir="TD")
+            dot.attr(size=f"{constants.DOUBLE_COL_FIG_WIDTH},{constants.DOUBLE_COL_FIG_HEIGHT}")
+            dot.attr(dpi=str(constants.DPI))
+            dot.attr(fontsize=str(constants.FONT_SIZE))
+            dot.attr(fontname=constants.FONT_FAMILY)
 
-        for place in self.places:
-            label = f"{place.name}\nTokens: {place.tokens}"
+        for place in self.places:            
+            if report_ready:
+                label = f"Tokens: {place.tokens}"
+                color = "black"
+                style = "rounded"
+            else:
+                label = f"{place.name}\nTokens: {place.tokens}"
+                color = "lightblue"
+                style = "filled"
+            
             dot.node(
                 place.name,
                 label=label,
                 shape="circle",
-                color="lightblue",
-                style="filled",
+                color=color,
+                style=style,
             )
 
         for transition in self.transitions:
+            
+            color = "black" if report_ready else "lightgreen"
+            style = "" if report_ready else "filled"
+            
+            
             dot.node(
                 transition.name,
                 label=transition.name,
                 shape="box",
-                color="lightgreen",
-                style="filled",
+                color=color,
+                style=style,
             )
 
         for arc in self.arcs:
-            dot.edge(arc.source, arc.target, label=str(arc.weight))
+            edge_label = None if report_ready else str(arc.weight)
+            dot.edge(arc.source, arc.target, label=edge_label)
 
-        output_path = dot.render(filename, cleanup=True)
+
+        output_path = dot.render(filename, cleanup=True, format=format)
         print(f"Petri net saved as {output_path}")
 
     def get_start_place(self):

@@ -17,19 +17,13 @@ class GraphBuilder:
     def build_petrinet_graph(self):
         """ Build a Petri net graph from an event log """
         
-        # Initialize graph data structure
-        graph = Data()
-        
         data = self._initialize_graph_data()
         
         data = self._add_transition_nodes(data)
-
         # add candidate places
         data = self.add_candidate_places(data)
-        
         # Assign data to the graph
-        graph = self._assign_data_to_graph(data)
-        
+        graph = self._assign_data_to_graph(data)  
         # Correct the edge index format
         graph.edge_index = torch.tensor(data['edges'], dtype=torch.long).t().contiguous()
         

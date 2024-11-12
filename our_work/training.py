@@ -11,7 +11,7 @@ def train(all_graphs, input_dim=64, hidden_dim=16, output_dim=1, lr=0.01, epochs
     # Instantiate model, optimizer, and loss function
     model = GraphSAGEModel(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = torch.nn.BCEWithLogitsLoss()
+    criterion = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([10.0]))
 
     for epoch in range(epochs):
         epoch_loss = 0  # Track loss for all graphs in each epoch
@@ -43,8 +43,8 @@ def train(all_graphs, input_dim=64, hidden_dim=16, output_dim=1, lr=0.01, epochs
     
         
 if __name__ == "__main__":
-    all_petrinets = load_all_petrinets("./synthetic_data")
-    all_eventlogs = load_all_eventlogs("./synthetic_data")
+    all_petrinets = load_all_petrinets("./data_generation/synthetic_data")
+    all_eventlogs = load_all_eventlogs("./data_generation/synthetic_data")
     
     pyg_graphs = []
     

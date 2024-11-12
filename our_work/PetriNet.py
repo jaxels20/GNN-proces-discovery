@@ -11,7 +11,7 @@ from EventLog import EventLog
 from pm4py.write import write_ptml
 from pm4py.convert import convert_to_process_tree as convert_to_pt
 from torch_geometric.data import Data
-
+from copy import deepcopy
 
 class Place:
     """
@@ -308,7 +308,7 @@ class PetriNet:
         initial_marking = Marking({source: 1})
         final_marking = Marking({target: 1})
 
-        return pm4py_pn, initial_marking, final_marking
+        return deepcopy(pm4py_pn), deepcopy(initial_marking), deepcopy(final_marking)
 
     @classmethod
     def from_pm4py(cls, pm4py_pn):
@@ -344,14 +344,14 @@ class PetriNet:
         start_place = converted_pn.get_start_place()
         start_place.tokens = 1
 
-        return converted_pn
+        return deepcopy(converted_pn)
 
     @staticmethod
     def from_ptml(ptml_file: str):
         """Create a Petri net from a PTML file."""
         pt = import_ptml_tree(ptml_file)
         pm4py_pn, _, _ = convert_pt_to_pn(pt)
-        return PetriNet.from_pm4py(pm4py_pn)
+        return deepcopy(PetriNet.from_pm4py(pm4py_pn))
 
     def soundness_check(self) -> bool:
         """Check if the Petri net is sound, i.e. safeness, proper completion, option to complete and absence of dead parts"""
@@ -476,7 +476,8 @@ class PetriNet:
         graph : PyTorch Geometric Data
             The graph containing nodes, edges, node attributes, and selected nodes.
         """
-        pn = PetriNet()
+        pn = PetriNet(arcs=[], places=[], transitions=[])
+        print(f"pn: {pn}")
         # Extract the necessary data
         node_names = graph['nodes']
         node_types = graph['node_types']
@@ -519,5 +520,4 @@ class PetriNet:
         # add a start and end place 
         pn.construct_start_place()
         pn.construct_end_place()        
-        
         return pn

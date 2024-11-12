@@ -94,7 +94,6 @@ def generate_logs(trees: list, output_dir: str, parameters: dict, num_cores: int
         event_logs = pool.starmap(generate_single_log, [(tree, parameters) for tree in trees])
         pool.starmap(write_event_log, [(eventlog, output_dir, i) for i, eventlog in enumerate(event_logs)])
 
-
 if __name__ == "__main__":
     tree_gen_config = {
         "sequence" : 0.2,
@@ -107,10 +106,10 @@ if __name__ == "__main__":
         "max" : 30,
         "silent" : 0.2,
         "duplicate" : 0,
-        "no_models": 10,
+        "no_models": 100,
     }
     log_gen_config = {
-        "num_traces" : 100,
+        "num_traces" : 200,
     }
     pts = generate_process_trees("./data_generation/synthetic_data/", tree_gen_config)
     generate_logs(pts, "./data_generation/synthetic_data/", log_gen_config)

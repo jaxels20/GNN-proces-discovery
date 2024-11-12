@@ -5,6 +5,7 @@ from GraphBuilder import GraphBuilder
 import torch
 from torch_geometric.data import Data
 from PetriNet import PetriNet
+import copy
 
 
 def do_inference(graph: Data, model: torch.nn.Module):
@@ -16,19 +17,16 @@ def do_inference(graph: Data, model: torch.nn.Module):
     
     return graph
     
-def discover(eventlog: EventLog, model_path: str = "./models/graph_sage_model.pth"):
+def discover(eventlog: EventLog, model_path: str = "./models/graph_sage_model.pth", eventually_follows_length: int = 1):
     # Load the model
     model = GraphSAGEModel(input_dim=64, hidden_dim=16, output_dim=1)
     model.load_state_dict(torch.load(model_path))
-    
     # Get the event log as a graph
-    graph_builder = GraphBuilder(eventlog=eventlog)
+    graph_builder = GraphBuilder(eventlog=eventlog, length=eventually_follows_length)
     graph = graph_builder.build_petrinet_graph()
     
     graph = do_inference(graph, model)
-    
     discovered_pn = PetriNet.from_graph(graph)
-    
     return discovered_pn
     
 if __name__ == "__main__":

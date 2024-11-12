@@ -8,6 +8,9 @@ import pandas as pd
 from inference import discover
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from concurrent.futures import ProcessPoolExecutor
+import copy
+
 
 # This class can evaluate a discovered process model against an event log (only one!)
 class SingleEvaluator:
@@ -42,8 +45,8 @@ class SingleEvaluator:
     
     def get_replay_fitness(self):
         fitness = replay_fitness(self.event_log_pm4py, self.process_model_pm4py, self.init_marking, self.final_marking)
-        print(fitness)
-        return fitness['percFitTraces']
+
+        return fitness['percentage_of_fitting_traces']
     
     def get_precision(self):
         precision_value = precision(self.event_log_pm4py, self.process_model_pm4py, self.init_marking, self.final_marking)
@@ -59,43 +62,60 @@ class SingleEvaluator:
         return f1_score
         
 
+# Define a helper function that will handle evaluation for a single Petri net and event log pair
+def evaluate_single(key, petri_net, event_log, output_png):
+    evaluator = SingleEvaluator(petri_net, event_log)
+    # Get metrics and round to 4 decimal places
+    metrics = {k: round(v, 4) for k, v in evaluator.get_evaluation_metrics().items()}
+    metrics['id'] = key
+    
+    # Save as PNG if requested
+    if output_png:
+        petri_net.visualize(f"{key}")
+
+    
+    return metrics
+
+
+# This function discovers a process model from an event log 
+# and evaluates it against the event log (calculates the metrics)
 class MultiEvaluator:
     def __init__(self, event_logs: dict):
         """
         Initialize with dictionaries of Petri nets and event logs.
         """
-        self.petri_nets = {i: discover(event_logs[i]) for i in event_logs}
+        #self.petri_nets = {i: discover(event_logs[i]) for i in event_logs}
         self.event_logs = event_logs
-
-    def evaluate_all(self, output_png=False):
+        self.petri_nets = {}
+        for i in event_logs:
+            print(f"Discovering Petri net for event log {i}")
+            self.petri_nets[i] = discover(event_logs[i])
+            print(f"pertri net: {self.petri_nets[i]}")
+        
+    # Modify the main function to use multiprocessing
+    def evaluate_all(self, output_png=False, num_cores=None):
         """
-        Evaluate all Petri nets against their corresponding event logs and return a DataFrame.
+        Evaluate all Petri nets against their corresponding event logs using multiprocessing,
+        and return a DataFrame.
         """
         results = []
+        
 
-        for key in self.petri_nets:
-            if key in self.event_logs:
-                # Initialize the evaluator for the current Petri net and event log
-                evaluator = SingleEvaluator(self.petri_nets[key], self.event_logs[key])
-
-                # Get metrics and add the ID for identification
-                metrics = evaluator.get_evaluation_metrics()
-                # round the values to 4 decimal places
-                metrics = {k: round(v, 4) for k, v in metrics.items()}
-                
-                metrics['id'] = key
-                
-                # Append the results
-                results.append(metrics)
-                
-                # Save the Petri net as a PNG file
-                if output_png:
-                    self.petri_nets[key].visualize(f"./results/{key}.png")
-                
-            else:
-                print(f"No matching event log for Petri net with ID {key}")
-
-        # Convert the results to a DataFrame
+        # Use ProcessPoolExecutor for multiprocessing
+        with ProcessPoolExecutor(max_workers=num_cores) as executor:
+            # Prepare the arguments for each Petri net/event log pair
+            futures = [
+                executor.submit(evaluate_single, key, self.petri_nets[key], self.event_logs[key], output_png)
+                for key in self.petri_nets if key in self.event_logs
+            ]
+            
+            # Collect the results as they complete
+            for future in futures:
+                try:
+                    results.append(future.result())
+                except Exception as e:
+                    print(f"Error evaluating Petri net: {e}")
+        
         return pd.DataFrame(results)
 
     def save_dataframe_to_pdf(self, df, pdf_path):

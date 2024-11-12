@@ -50,7 +50,7 @@ def simple_sequence(output_dir: str) -> None:
     petri_net.add_arc("B->C", "C")
     petri_net.add_arc("C", "End")
     
-    petri_net.visualize(f"{output_dir}{sub_folder_name}petri_net.png")
+    petri_net.visualize(f"{output_dir}{sub_folder_name}petri_net")
     petri_net.to_ptml(f"{output_dir}{sub_folder_name}petri_net.ptml")
 
 
@@ -138,7 +138,7 @@ def simple_and_split(output_dir: str) -> None:
 # TEST CASE 6: A long term dependency
 def long_dependency(output_dir: str) -> None:
     # Write Petrinet and XES file
-    traces = ["ABDEG", "ACDFG", "ABDEG", "ACDFG"]
+    traces = ["ACD", "BCE", "ACD", "BCE"]
     subfolder_name = "long_dependency"
     
     #Check if the folder exists
@@ -155,26 +155,39 @@ def long_dependency(output_dir: str) -> None:
     petri_net.add_transition("C")
     petri_net.add_transition("D")
     petri_net.add_transition("E")
-    petri_net.add_transition("F")
-    petri_net.add_transition("G")
+
     
     petri_net.add_place("Start", tokens=1)
     petri_net.add_place("End")
     
-    petri_net.add_place("A->B")
-    petri_net.add_place("A->C")
-    petri_net.add_place("B->D")
-    petri_net.add_place("C->D")
-    petri_net.add_place("D->E")
-    petri_net.add_place("E->G")
-    petri_net.add_place("D->F")
-    petri_net.add_place("F->G")    
+    petri_net.add_place("A,B->C")
+    petri_net.add_place("C->D,E")
+    petri_net.add_place("A->D")
+    petri_net.add_place("B->E")
+     
     
     # Add arcs to the Petri net
     
+    petri_net.add_arc("Start", "A")
+    petri_net.add_arc("Start", "B")
+    petri_net.add_arc("A", "A,B->C")
+    petri_net.add_arc("B", "A,B->C")
+    petri_net.add_arc("A,B->C", "C")
+    petri_net.add_arc("C", "C->D,E")
+    petri_net.add_arc("C->D,E", "D")
+    petri_net.add_arc("C->D,E", "E")
+    petri_net.add_arc("A", "A->D")
+    petri_net.add_arc("B", "B->E")
+    petri_net.add_arc("A->D", "D")
+    petri_net.add_arc("B->E", "E")
     
-
-
+    petri_net.add_arc("D", "End")
+    petri_net.add_arc("E", "End")
+    
+    petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
+    petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
+    
+    
 
 
 
@@ -183,6 +196,6 @@ if __name__ == "__main__":
     simple_sequence(output_dir)
     simple_xor_split(output_dir)
     simple_and_split(output_dir)
-    #long_dependency(output_dir)
+    long_dependency(output_dir)
     
     

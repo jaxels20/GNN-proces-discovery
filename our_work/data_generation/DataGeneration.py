@@ -106,7 +106,7 @@ if __name__ == "__main__":
         "max" : 30,
         "silent" : 0.2,
         "duplicate" : 0,
-        "no_models": 100,
+        "no_models": 500,
     }
     log_gen_config = {
         "num_traces" : 200,

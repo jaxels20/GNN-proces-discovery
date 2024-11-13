@@ -102,25 +102,6 @@ def load_parameters(file_path):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD:our_work/data_generation/DataGeneration.py
-    tree_gen_config = {
-        "sequence" : 0.2,
-        "choice" : 0.2,
-        "parallel" : 0.2,
-        "loop" : 0.2,
-        "or" : 0.2,
-        "mode" : 20,
-        "min" : 10,
-        "max" : 30,
-        "silent" : 0.2,
-        "duplicate" : 0,
-        "no_models": 500,
-    }
-    log_gen_config = {
-        "num_traces" : 200,
-    }
-=======
     tree_gen_config, log_gen_config = load_parameters("./data_generation/params.json")
->>>>>>> 131110e719b90d9edb083d50b1f2e655d11f281c:our_work/data_generation/data_generation.py
     pts = generate_process_trees("./data_generation/synthetic_data/", tree_gen_config)
     generate_logs(pts, "./data_generation/synthetic_data/", log_gen_config)

@@ -3,6 +3,7 @@ import pm4py.algo.simulation.playout.process_tree.variants.basic_playout as basi
 import pm4py.write as pm4pywrite
 from multiprocessing import Pool
 import os
+import json
 
 def generate_single_tree(parameters):
     return ptandloggenerator.GeneratedTree(parameters).generate()
@@ -93,8 +94,15 @@ def generate_logs(trees: list, output_dir: str, parameters: dict, num_cores: int
     with Pool(num_cores) as pool:
         event_logs = pool.starmap(generate_single_log, [(tree, parameters) for tree in trees])
         pool.starmap(write_event_log, [(eventlog, output_dir, i) for i, eventlog in enumerate(event_logs)])
+        
+def load_parameters(file_path):
+    with open(file_path, 'r') as file:
+        config = json.load(file)
+    return config["tree_generation"], config["log_generation"]
+
 
 if __name__ == "__main__":
+<<<<<<< HEAD:our_work/data_generation/DataGeneration.py
     tree_gen_config = {
         "sequence" : 0.2,
         "choice" : 0.2,
@@ -111,5 +119,8 @@ if __name__ == "__main__":
     log_gen_config = {
         "num_traces" : 200,
     }
+=======
+    tree_gen_config, log_gen_config = load_parameters("./data_generation/params.json")
+>>>>>>> 131110e719b90d9edb083d50b1f2e655d11f281c:our_work/data_generation/data_generation.py
     pts = generate_process_trees("./data_generation/synthetic_data/", tree_gen_config)
     generate_logs(pts, "./data_generation/synthetic_data/", log_gen_config)

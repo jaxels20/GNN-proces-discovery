@@ -509,7 +509,7 @@ class PetriNet:
             The graph containing nodes, edges, node attributes, and selected nodes.
         """
         pn = PetriNet(arcs=[], places=[], transitions=[])
-        print(f"pn: {pn}")
+
         # Extract the necessary data
         node_names = graph['nodes']
         node_types = graph['node_types']

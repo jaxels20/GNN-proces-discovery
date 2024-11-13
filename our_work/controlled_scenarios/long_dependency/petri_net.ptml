@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ptml>
+  <processTree name="8949de33-8653-40f6-b011-11c1e2b4692a" root="7f7309a9-df4a-4753-9ab0-f9840f972a8a" id="efe16b20-29f3-4560-ad63-c51a7e8b8590">
+    <sequence name="" id="7f7309a9-df4a-4753-9ab0-f9840f972a8a"/>
+    <manualTask name="B" id="c0556a51-76af-4b81-a824-d5a1586071ac"/>
+    <manualTask name="C" id="75a19cbc-260f-41d0-b89f-d178fe5fbfb6"/>
+    <manualTask name="E" id="cc48bd89-f722-4d93-9488-d4f502330e78"/>
+    <parentsNode id="116d0a1c-4c0e-45e5-9f7c-3006d013a977" sourceId="7f7309a9-df4a-4753-9ab0-f9840f972a8a" targetId="c0556a51-76af-4b81-a824-d5a1586071ac"/>
+    <parentsNode id="41ecd9da-3559-4d8f-9272-22550a09a57a" sourceId="7f7309a9-df4a-4753-9ab0-f9840f972a8a" targetId="75a19cbc-260f-41d0-b89f-d178fe5fbfb6"/>
+    <parentsNode id="433133be-a012-4c75-9566-3d0efd5fcbd4" sourceId="7f7309a9-df4a-4753-9ab0-f9840f972a8a" targetId="cc48bd89-f722-4d93-9488-d4f502330e78"/>
+  </processTree>
+</ptml>

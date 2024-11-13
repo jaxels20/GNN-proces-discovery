@@ -206,7 +206,7 @@ def long_dependency(output_dir: str) -> None:
     #Check if the folder exists
     os.makedirs(f"{output_dir}{subfolder_name}", exist_ok=True)
     
-    ToyDataGenerator.traces_to_xes(traces, f"{output_dir}{subfolder_name}/eventlog.xes, report_ready=True")
+    ToyDataGenerator.traces_to_xes(traces, f"{output_dir}{subfolder_name}/eventlog.xes")
     # Initialize a new Petri net
     petri_net = PetriNet()
     petri_net.empty()
@@ -227,9 +227,7 @@ def long_dependency(output_dir: str) -> None:
     petri_net.add_place("A->D")
     petri_net.add_place("B->E")
      
-    
     # Add arcs to the Petri net
-    
     petri_net.add_arc("Start", "A")
     petri_net.add_arc("Start", "B")
     petri_net.add_arc("A", "A,B->C")
@@ -242,9 +240,10 @@ def long_dependency(output_dir: str) -> None:
     petri_net.add_arc("B", "B->E")
     petri_net.add_arc("A->D", "D")
     petri_net.add_arc("B->E", "E")
-    
     petri_net.add_arc("D", "End")
     petri_net.add_arc("E", "End")
+    
+    
     
     petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")

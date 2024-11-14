@@ -9,8 +9,11 @@ if __name__ == "__main__":
     all_eventlogs = {f"./results/{k}": v for k, v in all_eventlogs.items()}
     
     # Create and evaluate the MultiEvaluator
-    multi_evaluator = MultiEvaluator(all_eventlogs)
+    multi_evaluator = MultiEvaluator(all_eventlogs, ["alpha", "heuristic", "inductive"])
+    
+    
     results_df = multi_evaluator.evaluate_all(output_png=True, num_cores=4)
+    
     results_df.to_csv("./results/results.csv")
     multi_evaluator.save_dataframe_to_pdf(results_df, "./results/results.pdf")
     

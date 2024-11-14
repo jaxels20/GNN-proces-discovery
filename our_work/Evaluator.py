@@ -1,11 +1,12 @@
 from PetriNet import PetriNet
 from EventLog import EventLog
-from pm4py.algo.evaluation.replay_fitness.algorithm import apply as replay_fitness
-from pm4py.algo.evaluation.precision.algorithm import apply as precision
-from pm4py.algo.evaluation.generalization.algorithm import apply as generalization
-from pm4py.algo.evaluation.simplicity.algorithm import apply as simplicity
+#from pm4py.algo.evaluation.replay_fitness.algorithm import apply as replay_fitness
+from pm4py.algo.evaluation.replay_fitness.variants.token_replay import apply as replay_fitness
+from pm4py.algo.evaluation.precision.variants.etconformance_token import apply as precision
+from pm4py.algo.evaluation.generalization.variants.token_based import apply as generalization
+from pm4py.algo.evaluation.simplicity.variants.arc_degree import apply as simplicity
 import pandas as pd
-from inference import discover
+from Discovery import Discovery
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from concurrent.futures import ProcessPoolExecutor
@@ -28,11 +29,10 @@ class SingleEvaluator:
         data = {
             "simplicity": self.get_simplicity(),
             "generalization": self.get_generalization(),
-            "replay_fitness": self.get_replay_fitness(),
+            "fitness": self.get_replay_fitness(),
             "precision": self.get_precision(),
         }
-        data["f1_score"] = self.get_f1_score(data["precision"], data["replay_fitness"])
-        
+        data["f1_score"] = self.get_f1_score(data["precision"], data["fitness"])
         return data    
     
     def get_simplicity(self):
@@ -45,8 +45,8 @@ class SingleEvaluator:
     
     def get_replay_fitness(self):
         fitness = replay_fitness(self.event_log_pm4py, self.process_model_pm4py, self.init_marking, self.final_marking)
-
-        return fitness['percentage_of_fitting_traces']
+        print(fitness)
+        return fitness['log_fitness']
     
     def get_precision(self):
         precision_value = precision(self.event_log_pm4py, self.process_model_pm4py, self.init_marking, self.final_marking)
@@ -57,65 +57,77 @@ class SingleEvaluator:
             precision = self.get_precision()
         if fitness is None:
             fitness = self.get_replay_fitness()
-        
-        f1_score = 2 * (precision * fitness) / (precision + fitness)
+        try:
+            f1_score = 2 * (precision * fitness) / (precision + fitness)
+        except ZeroDivisionError:
+            f1_score = 0.0
         return f1_score
         
 
 # Define a helper function that will handle evaluation for a single Petri net and event log pair
-def evaluate_single(key, petri_net, event_log, output_png):
+def evaluate_single(miner, dataset, petri_net, event_log, output_png):
     evaluator = SingleEvaluator(petri_net, event_log)
+    
     # Get metrics and round to 4 decimal places
     metrics = {k: round(v, 4) for k, v in evaluator.get_evaluation_metrics().items()}
-    metrics['id'] = key
+    metrics['miner'] = miner
+    metrics['dataset'] = dataset
     
     # Save as PNG if requested
     if output_png:
-        petri_net.visualize(f"{key}")
-
+        petri_net.visualize(f"{dataset}.png")
     
     return metrics
 
 # This function discovers a process model from an event log 
 # and evaluates it against the event log (calculates the metrics)
 class MultiEvaluator:
-    def __init__(self, event_logs: dict):
+    def __init__(self, event_logs: dict, methods: list):
         """
         Initialize with dictionaries of Petri nets and event logs.
-        """
-        #self.petri_nets = {i: discover(event_logs[i]) for i in event_logs}
-        self.event_logs = event_logs
-        self.petri_nets = {}
-        for i in event_logs:
-            print(f"Discovering Petri net for event log {i}")
-            self.petri_nets[i] = discover(event_logs[i])
-            print(f"pertri net: {self.petri_nets[i]}")
+        Args:
+        - event_logs (dict): A dictionary where keys are event log names and values are EventLog objects.
         
-    # Modify the main function to use multiprocessing
+        - methods (list): A list of strings representing the discovery methods to use. can be "alpha", "heuristic", "inductive", "GNN"
+        
+        """
+        self.event_logs = event_logs # dictionary of event logs with keys as event log names and values as EventLog objects
+        self.petri_nets = {method: {} for method in methods} # dictionary of Petri nets with keys as discovery methods 
+        # and values a dict of event log names and PetriNet objects
+        
+        for method in methods:
+            for event_log_name, event_log in self.event_logs.items():
+                self.petri_nets[method][event_log_name] = Discovery.run_discovery(method, event_log)
+        
     def evaluate_all(self, output_png=False, num_cores=None):
-        """
-        Evaluate all Petri nets against their corresponding event logs using multiprocessing,
-        and return a DataFrame.
-        """
-        results = []
-        
-
-        # Use ProcessPoolExecutor for multiprocessing
-        with ProcessPoolExecutor(max_workers=num_cores) as executor:
-            # Prepare the arguments for each Petri net/event log pair
-            futures = [
-                executor.submit(evaluate_single, key, self.petri_nets[key], self.event_logs[key], output_png)
-                for key in self.petri_nets if key in self.event_logs
-            ]
+            """
+            Evaluate all Petri nets against their corresponding event logs using multiprocessing,
+            and return a DataFrame with metrics.
+            """
+            results = []
             
-            # Collect the results as they complete
-            for future in futures:
-                try:
-                    results.append(future.result())
-                except Exception as e:
-                    print(f"Error evaluating Petri net: {e}")
-        
-        return pd.DataFrame(results)
+            # Use ProcessPoolExecutor for multiprocessing
+            with ProcessPoolExecutor(max_workers=num_cores) as executor:
+                futures = []
+                
+                # Iterate through each miner type and dataset in petri_nets
+                for miner, datasets in self.petri_nets.items():
+                    for dataset, petri_net in datasets.items():
+                        if dataset in self.event_logs:
+                            event_log = self.event_logs[dataset]
+                            futures.append(
+                                executor.submit(evaluate_single, miner, dataset, petri_net, event_log, output_png)
+                            )
+                
+                # Collect the results as they complete
+                for future in futures:
+                    try:
+                        results.append(future.result())
+                    except Exception as e:
+                        print(f"Error evaluating Petri net: {e}")
+            
+            # Convert the list of dictionaries to a DataFrame
+            return pd.DataFrame(results, columns=['miner', 'dataset', 'fitness', 'simplicity', 'generalization', 'precision', 'f1_score'])
 
     def save_dataframe_to_pdf(self, df, pdf_path):
         # Set up PDF document

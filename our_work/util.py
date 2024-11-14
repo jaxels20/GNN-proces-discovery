@@ -3,7 +3,9 @@ from EventLog import EventLog
 import os
 
 def load_all_petrinets(input_dir: str):
-    """ Load all petrinets (process trees)from a directory and return a list of PetriNet objects."""
+    """ Load all petrinets (process trees)from a directory and return a list of PetriNet objects. 
+        Where the keys are filenames and the values are PetriNet objects.
+    """
     all_files = os.listdir(input_dir)
     # prepend directory to filenames
     all_files = [os.path.join(input_dir, file) for file in all_files]
@@ -17,7 +19,9 @@ def load_all_petrinets(input_dir: str):
     return all_petrinets
 
 def load_all_eventlogs(input_dir: str):
-    """ Load all event logs from a directory and return a dictionary of EventLog objects."""
+    """ Load all event logs from a directory and return a dictionary of EventLog objects.
+        Where the keys are filenames and the values are EventLog objects.
+    """
     all_files = os.listdir(input_dir)
     # prepend directory to filenames
     all_files = [os.path.join(input_dir, file) for file in all_files]

@@ -163,3 +163,4 @@ cython_debug/
 #.idea/
 
 our_work/real_life_datasets/
+our_work/data_generation/synthetic_data/

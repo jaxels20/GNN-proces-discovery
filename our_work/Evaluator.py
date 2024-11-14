@@ -76,7 +76,6 @@ def evaluate_single(key, petri_net, event_log, output_png):
     
     return metrics
 
-
 # This function discovers a process model from an event log 
 # and evaluates it against the event log (calculates the metrics)
 class MultiEvaluator:
@@ -136,7 +135,4 @@ class MultiEvaluator:
             pdf.savefig(fig)
             plt.close()
     
-    
-
-
     

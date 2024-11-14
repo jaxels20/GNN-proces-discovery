@@ -106,10 +106,10 @@ if __name__ == "__main__":
         "max" : 30,
         "silent" : 0.2,
         "duplicate" : 0,
-        "no_models": 100,
+        "no_models": 1,
     }
     log_gen_config = {
-        "num_traces" : 200,
+        "num_traces" : 5,
     }
     pts = generate_process_trees("./data_generation/synthetic_data/", tree_gen_config)
     generate_logs(pts, "./data_generation/synthetic_data/", log_gen_config)

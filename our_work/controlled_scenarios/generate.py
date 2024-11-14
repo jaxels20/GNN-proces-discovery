@@ -197,6 +197,10 @@ def loop_lenght_2(output_dir: str) -> None:
     petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net", report_ready=True)
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
     
+
+# TEST CASE: A simple loop of lenght 3
+    
+
 # TEST CASE 6: A long term dependency
 def long_dependency(output_dir: str) -> None:
     # Write Petrinet and XES file
@@ -249,6 +253,12 @@ def long_dependency(output_dir: str) -> None:
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
     
     
+# Test CASE 7: OR SPlIT
+
+# TEST CASE 8: Realistic example 
+
+
+
 if __name__ == "__main__":
     output_dir = "./controlled_scenarios/"
     simple_sequence(output_dir)

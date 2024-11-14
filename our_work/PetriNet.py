@@ -66,6 +66,15 @@ class Transition:
 
     def __repr__(self):
         return f"Transition({self.name})"
+    
+    def __eq__(self, other):
+        return self.name == other.name
+    
+    def __gt__(self, other):
+        return self.name > other.name
+    
+    def __lt__(self, other):
+        return self.name < other.name
 
 class Arc:
     """
@@ -152,6 +161,15 @@ class PetriNet:
             if transition.name == name:
                 return transition
         return None
+
+    def get_ingoing_transitions(self, place_name: str) -> list[Transition]:
+        """Return the transitions that have an arc to the place."""
+        return [self.get_transition_by_name(arc.source) for arc in self.arcs if arc.target == place_name]
+    
+    def get_outgoing_transitions(self, place_name: str) -> list[Transition]:
+        """Return the transitions that have an arc from the place."""
+        return [self.get_transition_by_name(arc.target) for arc in self.arcs if arc.source == place_name]
+
 
     def is_transition_enabled(self, transition_name: str) -> bool:
         """
@@ -499,7 +517,7 @@ class PetriNet:
         self.arcs = []
       
     @staticmethod
-    def from_graph(graph):
+    def from_graph(graph: Data):
         """
         Populate the Petri net from a PyTorch Geometric graph, considering only selected nodes.
 

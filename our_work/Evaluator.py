@@ -29,10 +29,10 @@ class SingleEvaluator:
         data = {
             "simplicity": self.get_simplicity(),
             "generalization": self.get_generalization(),
-            "fitness": self.get_replay_fitness(),
+            **self.get_replay_fitness(),
             "precision": self.get_precision(),
         }
-        data["f1_score"] = self.get_f1_score(data["precision"], data["fitness"])
+        data["f1_score"] = self.get_f1_score(data["precision"], data["log_fitness"])
         return data    
     
     def get_simplicity(self):
@@ -45,8 +45,7 @@ class SingleEvaluator:
     
     def get_replay_fitness(self):
         fitness = replay_fitness(self.event_log_pm4py, self.process_model_pm4py, self.init_marking, self.final_marking)
-        print(fitness)
-        return fitness['log_fitness']
+        return fitness
     
     def get_precision(self):
         precision_value = precision(self.event_log_pm4py, self.process_model_pm4py, self.init_marking, self.final_marking)
@@ -65,17 +64,17 @@ class SingleEvaluator:
         
 
 # Define a helper function that will handle evaluation for a single Petri net and event log pair
-def evaluate_single(miner, dataset, petri_net, event_log, output_png):
+def evaluate_single(miner: str, dataset: str, petri_net: PetriNet, event_log: EventLog, output_png: bool):
     evaluator = SingleEvaluator(petri_net, event_log)
     
     # Get metrics and round to 4 decimal places
-    metrics = {k: round(v, 4) for k, v in evaluator.get_evaluation_metrics().items()}
+    metrics = {k: round(v, 3) for k, v in evaluator.get_evaluation_metrics().items()}
     metrics['miner'] = miner
     metrics['dataset'] = dataset
     
     # Save as PNG if requested
     if output_png:
-        petri_net.visualize(f"{dataset}.png")
+        petri_net.visualize(f"{dataset}", format="png")
     
     return metrics
 
@@ -127,24 +126,36 @@ class MultiEvaluator:
                         print(f"Error evaluating Petri net: {e}")
             
             # Convert the list of dictionaries to a DataFrame
-            return pd.DataFrame(results, columns=['miner', 'dataset', 'fitness', 'simplicity', 'generalization', 'precision', 'f1_score'])
+            return pd.DataFrame(results)
+
 
     def save_dataframe_to_pdf(self, df, pdf_path):
-        # Set up PDF document
+        # Step 2: Group the DataFrame by 'dataset'
+        grouped = df.groupby('dataset')
+        
         with PdfPages(pdf_path) as pdf:
-            # Create a figure and axis
-            fig, ax = plt.subplots(figsize=(10, len(df) * 0.5))  # Adjust figure size as needed
-            ax.axis('tight')
-            ax.axis('off')
+            for dataset, group in grouped:
+                # Create a figure for each dataset
+                fig, ax = plt.subplots(figsize=(8, 6))
+                ax.axis('off')  # Turn off the axis
+                
+                # Add a title for the dataset
+                fig.suptitle(dataset, fontsize=14, fontweight='bold')
+                
+                # Format the group data as a table
+                metrics_table = group[['miner', 'simplicity', 'generalization', 'perc_fit_traces',
+                                    'average_trace_fitness', 'log_fitness', 'precision', 'f1_score']]
+                table_data = metrics_table.values
+                column_headers = metrics_table.columns
+                
+                # Add the table to the figure
+                ax.table(cellText=table_data, colLabels=column_headers, loc='center', cellLoc='center')
+                
+                # Adjust layout and save this page to the PDF
+                plt.tight_layout()
+                pdf.savefig(fig)
+                plt.close(fig)
 
-            # Create the table
-            table = ax.table(cellText=df.values, colLabels=df.columns, cellLoc='center', loc='center')
-            table.auto_set_font_size(False)
-            table.set_fontsize(10)
-            table.scale(1.2, 1.2)  # Scale table to fit PDF page nicely
-
-            # Save the figure containing the table to the PDF
-            pdf.savefig(fig)
-            plt.close()
+        print(f"PDF saved as {pdf_path}")
     
     

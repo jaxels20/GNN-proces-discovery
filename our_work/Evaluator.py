@@ -64,7 +64,7 @@ class SingleEvaluator:
         
 
 # Define a helper function that will handle evaluation for a single Petri net and event log pair
-def evaluate_single(miner: str, dataset: str, petri_net: PetriNet, event_log: EventLog, output_png: bool):
+def evaluate_single(miner: str, dataset: str, petri_net: PetriNet, event_log: EventLog):
     evaluator = SingleEvaluator(petri_net, event_log)
     
     # Get metrics and round to 4 decimal places
@@ -72,9 +72,6 @@ def evaluate_single(miner: str, dataset: str, petri_net: PetriNet, event_log: Ev
     metrics['miner'] = miner
     metrics['dataset'] = dataset
     
-    # Save as PNG if requested
-    if output_png:
-        petri_net.visualize(f"{dataset}", format="png")
     
     return metrics
 
@@ -98,7 +95,7 @@ class MultiEvaluator:
             for event_log_name, event_log in self.event_logs.items():
                 self.petri_nets[method][event_log_name] = Discovery.run_discovery(method, event_log)
         
-    def evaluate_all(self, output_png=False, num_cores=None):
+    def evaluate_all(self, num_cores=None):
             """
             Evaluate all Petri nets against their corresponding event logs using multiprocessing,
             and return a DataFrame with metrics.
@@ -115,7 +112,7 @@ class MultiEvaluator:
                         if dataset in self.event_logs:
                             event_log = self.event_logs[dataset]
                             futures.append(
-                                executor.submit(evaluate_single, miner, dataset, petri_net, event_log, output_png)
+                                executor.submit(evaluate_single, miner, dataset, petri_net, event_log)
                             )
                 
                 # Collect the results as they complete
@@ -128,7 +125,20 @@ class MultiEvaluator:
             # Convert the list of dictionaries to a DataFrame
             return pd.DataFrame(results)
 
-
+    def export_petri_nets(self, output_dir, format="png"):
+        """
+        Export all Petri nets to the specified directory. They format can be specified as "png" or "pdf.
+        """
+        for miner, datasets in self.petri_nets.items():
+            for dataset, petri_net in datasets.items():
+                if format == "png":
+                    petri_net.visualize(f"{output_dir}/{dataset}/{miner}", format="png")
+                elif format == "pdf":
+                    petri_net.visualize(f"{output_dir}/{dataset}/{miner}", format="pdf")
+                else:
+                    print(f"Invalid format: {format}. Must be 'png' or 'pdf'.")
+                    break
+        
     def save_dataframe_to_pdf(self, df, pdf_path):
         # Step 2: Group the DataFrame by 'dataset'
         grouped = df.groupby('dataset')

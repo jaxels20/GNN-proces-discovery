@@ -48,6 +48,9 @@ def batch_petrinet_loader(input_dir: str, batch_size: int, cpu_count: int = 1):
     # List all files in the input directory
     all_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.endswith(".ptml")]
 
+    # sort files by name
+    all_files.sort()
+    
     # Iterate over the files in batches
     for i in range(0, len(all_files), batch_size):
         batch_files = all_files[i:i + batch_size]
@@ -111,6 +114,8 @@ def batch_eventlog_loader(input_dir: str, batch_size: int, cpu_count: int = 1):
     """
     # List all files in the input directory
     all_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.endswith(".xes")]
+    # sort the files to ensure consistent ordering
+    all_files.sort()
 
     # Iterate over the files in batches
     for i in range(0, len(all_files), batch_size):

@@ -16,7 +16,6 @@ if __name__ == "__main__":
         key = dataset_dir
         eventlogs[key] = next(iter(temp_eventlogs.values()))
     
-
     #Create and evaluate the MultiEvaluator
     multi_evaluator = MultiEvaluator(eventlogs, methods=["alpha", "heuristic", "inductive"])
     results_df = multi_evaluator.evaluate_all(num_cores=4)

@@ -4,7 +4,7 @@ from EventLog import EventLog
 from GraphBuilder import GraphBuilder
 from PetriNet import PetriNet, Place, Transition, Arc
 from Models import GNNWithClassifier
-from util import load_all_petrinets, load_all_eventlogs
+from util import load_all_petrinets, load_all_eventlogs, batch_eventlog_loader, batch_petrinet_loader
 from torch_geometric.loader import DataLoader
 
 def train(all_graphs, input_dim=64, hidden_dim=16, dense_hidden_dim=32, output_dim=1, lr=0.01, epochs=100):
@@ -77,12 +77,14 @@ def train(all_graphs, input_dim=64, hidden_dim=16, dense_hidden_dim=32, output_d
     
         
 if __name__ == "__main__":
-    all_petrinets = load_all_petrinets("./data_generation/synthetic_data")
-    all_eventlogs = load_all_eventlogs("./data_generation/synthetic_data")
+    # all_petrinets = load_all_petrinets("./data_generation/synthetic_data")
+    # all_eventlogs = load_all_eventlogs("./data_generation/synthetic_data")
+    all_petrinets = batch_petrinet_loader("./data_generation/synthetic_data", 2)
+    all_eventlogs = batch_eventlog_loader("./data_generation/synthetic_data", 2)
     
     pyg_graphs = []
     
-    for id, petrinet in all_petrinets.items():
+    for id, petrinet in all_petrinets:
         eventlog = all_eventlogs[id]
         graph_builder = GraphBuilder(eventlog)
         graph = graph_builder.build_petrinet_graph()

@@ -6,18 +6,19 @@ if __name__ == "__main__":
     all_eventlogs = load_all_eventlogs(dataset_dir)
     
     # appned "./results" to the keys of the dictionary
-    all_eventlogs = {f"./results/{k}": v for k, v in all_eventlogs.items()}
+    #all_eventlogs = {f"./real_life_results/{k}": v for k, v in all_eventlogs.items()}
     
     # Create and evaluate the MultiEvaluator
     multi_evaluator = MultiEvaluator(all_eventlogs, ["alpha", "heuristic", "inductive"])
     
     
-    results_df = multi_evaluator.evaluate_all(output_png=True, num_cores=4)
+    results_df = multi_evaluator.evaluate_all(num_cores=4)
     
-    results_df.to_csv("./results/results.csv")
-    multi_evaluator.save_dataframe_to_pdf(results_df, "./results/results.pdf")
+    results_df.to_csv("./real_life_results/results.csv")
     
+    multi_evaluator.save_dataframe_to_pdf(results_df, "./real_life_results/results.pdf")
     
+    multi_evaluator.export_petri_nets("./real_life_results")
     
     
 

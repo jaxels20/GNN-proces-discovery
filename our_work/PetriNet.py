@@ -357,8 +357,9 @@ class PetriNet:
         target = pm4py_dict[self.get_end_place().name]
         initial_marking = Marking({source: 1})
         final_marking = Marking({target: 1})
-
-        return deepcopy(pm4py_pn), deepcopy(initial_marking), deepcopy(final_marking)
+        
+        
+        return pm4py_pn, initial_marking, final_marking
 
     @classmethod
     def from_pm4py(cls, pm4py_pn):

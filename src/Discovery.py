@@ -53,7 +53,8 @@ class Discovery:
     def GNN_miner(event_log: EventLog, model_path: str = "./models/graph_sage_model_with_dense_classifier.pth", eventually_follows_length: int = 1) -> PetriNet:
         # Load the model
         model = GNNWithClassifier(input_dim=64, hidden_dim=16, output_dim=1, dense_hidden_dim=32)
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+
         # Get the event log as a graph
         graph_builder = GraphBuilder(eventlog=event_log, length=eventually_follows_length)
         graph = graph_builder.build_petrinet_graph()

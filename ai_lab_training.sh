@@ -9,4 +9,4 @@
 PYTHON_SCRIPT_PATH="training.py"
 USER="fkowal20"
 
-singularity exec --nv /ceph/project/pm-project/pm-container.sif python3 training.py
+singularity exec --nv /ceph/project/pm-project/pm-container-1.tar.sif python3 training.py

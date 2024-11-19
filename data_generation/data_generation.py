@@ -8,13 +8,19 @@ import json
 CONFIG_FILE = "./data_generation/params.json"
 INPUT_DIR = "./data_generation/synthetic_data/"
 OUTPUT_DIR = "./data_generation/synthetic_data/"
+VALIDATION_SPLIT = 0.2
+TEST_SPLIT = 0.1
+
 
 
 def generate_single_tree(parameters):
     return ptandloggenerator.GeneratedTree(parameters).generate()
 
 
-def write_process_tree(pt, output_dir, index):
+def write_process_tree(pt, output_dir, index, assigned_group):
+    # create a directory for the group if it does not exist
+    output_dir = os.path.join(output_dir, assigned_group)
+    os.makedirs(output_dir, exist_ok=True)
     filename = os.path.join(output_dir, f"pt_{index}.ptml")
     pm4pywrite.write_ptml(pt, filename)
 
@@ -23,7 +29,10 @@ def generate_single_log(tree, parameters):
     return basic_playout.apply(tree, parameters)
 
 
-def write_event_log(eventlog, output_dir, index):
+def write_event_log(eventlog, output_dir, index, assigned_group):
+    # create a directory for the group if it does not exist
+    output_dir = os.path.join(output_dir, assigned_group)
+    os.makedirs(output_dir, exist_ok=True)
     filename = os.path.join(output_dir, f"log_{index}.xes")
     pm4pywrite.write_xes(eventlog, filename)
 
@@ -92,9 +101,17 @@ def generate_process_trees(
         list: generated process trees
     """
     pts = ptandloggenerator.apply(parameters, num_cores)
+
+    # Assign each process tree to a group ( can be training/validation/test) 
+    num_trees = len(pts)
+    num_train = int(num_trees * (1 - VALIDATION_SPLIT - TEST_SPLIT))
+    num_val = int(num_trees * VALIDATION_SPLIT)
+    num_test = num_trees - num_train - num_val
+    assigned_groups = ["train"] * num_train + ["validation"] * num_val + ["test"] * num_test
+
     with Pool(num_cores) as pool:
         pool.starmap(
-            write_process_tree, [(pt, output_dir, i) for i, pt in enumerate(pts)]
+            write_process_tree, [(pt, output_dir, i, assigned_group) for i, (pt, assigned_group) in enumerate(zip(pts, assigned_groups))]
         )
 
     return pts
@@ -115,9 +132,16 @@ def generate_logs(
         event_logs = pool.starmap(
             generate_single_log, [(tree, parameters) for tree in trees]
         )
+        # split the data into training, validation and test sets
+        num_event_logs = len(event_logs)
+        num_train = int(num_event_logs * (1 - VALIDATION_SPLIT - TEST_SPLIT))
+        num_val = int(num_event_logs * VALIDATION_SPLIT)
+        num_test = num_event_logs - num_train - num_val
+        assigned_groups = ["train"] * num_train + ["validation"] * num_val + ["test"] * num_test
+                
         pool.starmap(
             write_event_log,
-            [(eventlog, output_dir, i) for i, eventlog in enumerate(event_logs)],
+            [(eventlog, output_dir, i, assigned_group) for i, (eventlog, assigned_group) in enumerate(zip(event_logs, assigned_groups))],
         )
 
 
@@ -128,6 +152,10 @@ def load_parameters(file_path):
 
 
 if __name__ == "__main__":
+    # check if the input directory exists
+    os.makedirs(INPUT_DIR, exist_ok=True)
     tree_gen_config, log_gen_config = load_parameters(CONFIG_FILE)
     pts = generate_process_trees(INPUT_DIR, tree_gen_config)
     generate_logs(pts, OUTPUT_DIR, log_gen_config)
+
+    print("Data generation completed.")

@@ -1,16 +1,14 @@
 import torch
 import time
-from torch.utils.data import DataLoader
-from Models import GNNWithClassifier
-from GraphBuilder import GraphBuilder
-from BatchFileLoader import BatchFileLoader
-
+from torch_geometric.loader import DataLoader
+from src.GraphBuilder import GraphBuilder
+from src.BatchFileLoader import BatchFileLoader
+from src.Models import GNNWithClassifier
 
 class Trainer:
     def __init__(
         self,
-        eventlog_dir,
-        petrinet_dir,
+        input_data,
         input_dim=64,
         hidden_dim=16,
         dense_hidden_dim=32,
@@ -22,8 +20,9 @@ class Trainer:
         cpu_count=1,
         output_model_path="model.pth",
     ):
-        self.eventlog_dir = eventlog_dir
-        self.petrinet_dir = petrinet_dir
+        self.train_data_dir = input_data + "train/"
+        self.test_data_dir = input_data + "test/"
+        self.validation_data_dir = input_data + "validation/"
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.dense_hidden_dim = dense_hidden_dim
@@ -58,10 +57,11 @@ class Trainer:
         self.model.train()
 
         for eventlog_batch, petrinet_batch in zip(
-            batch_loader.batch_eventlog_loader(self.eventlog_dir, self.batch_size_load),
-            batch_loader.batch_petrinet_loader(self.petrinet_dir, self.batch_size_load),
+            batch_loader.batch_eventlog_loader(self.train_data_dir, self.batch_size_load),
+            batch_loader.batch_petrinet_loader(self.train_data_dir, self.batch_size_load),
         ):
             pyg_graphs = []
+            
 
             # Build and annotate graphs for the current batch
             for id, petrinet in petrinet_batch.items():

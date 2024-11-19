@@ -1,0 +1,8 @@
+pm4py==2.7.11.13
+matplotlib==3.9.2
+pandas==2.2.3
+numpy==2.1.2
+torch==2.4.0
+torch-geometric==2.6.1
+networkx==3.4.2
+

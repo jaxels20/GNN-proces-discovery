@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=model_training
-#SBATCH --output=result_%j.out
+#SBATCH --output=/ceph/project/pm-project/result_%j.out
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=1
@@ -9,4 +9,4 @@
 PYTHON_SCRIPT_PATH="training.py"
 USER="fkowal20"
 
-singularity exec /ceph/project/pytorch/pm-container.sif python3 training.py
+singularity exec /ceph/project/pm-project/pm-container.sif python3 training.py

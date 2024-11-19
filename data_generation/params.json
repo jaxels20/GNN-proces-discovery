@@ -5,14 +5,14 @@
         "parallel": 0.2,
         "loop": 0.2,
         "or": 0.2,
-        "mode": 20,
-        "min": 10,
-        "max": 30,
+        "mode": 8,
+        "min": 5,
+        "max": 12,
         "silent": 0.2,
         "duplicate": 0,
-        "no_models": 10
+        "no_models": 5000
     },
     "log_generation": {
-        "num_traces": 10
+        "num_traces": 100
     }
 }

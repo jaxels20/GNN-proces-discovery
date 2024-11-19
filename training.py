@@ -7,7 +7,7 @@ from src.Models import GNNWithClassifier
 from src.BatchFileLoader import BatchFileLoader
 from torch_geometric.loader import DataLoader
 from src.Trainer import Trainer
-EPOCHS = 1
+EPOCHS = 2
 NUM_WORKERS = 2
 BATCH_SIZE_LOAD = 10
 BATCH_SIZE_TRAIN = 2

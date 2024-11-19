@@ -4,6 +4,12 @@ from torch_geometric.loader import DataLoader
 from src.GraphBuilder import GraphBuilder
 from src.BatchFileLoader import BatchFileLoader
 from src.Models import GNNWithClassifier
+from src.inference import do_inference
+from src.Comparison import compare_discovered_pn_to_true_pn
+from src.PetriNet import PetriNet
+import pandas as pd
+from src.TrainingFigureGenerator import TrainingFigureGenerator
+from copy import deepcopy
 
 class Trainer:
     def __init__(
@@ -105,6 +111,7 @@ class Trainer:
 
     def train(self):
         print(f"Starting training for {self.epochs} epochs")
+        training_stats = {"epoch" : [], "avg_loss" : [], "time" : [], "avg_true_positives" : [], "avg_false_positives" : [], "avg_false_negatives" : []}
         start_time = time.time()
 
         batch_loader = BatchFileLoader(self.cpu_count)
@@ -116,7 +123,16 @@ class Trainer:
             # Print average loss per epoch
             avg_loss = epoch_loss / self.epochs  # Adjust as needed based on batch size
             epoch_end = time.time()
-            print(f"Epoch {epoch}, Avg Loss: {avg_loss:.4f}, Time: {epoch_end - epoch_start:.2f}s")
+            
+            # Test on validation data
+            tp, fp, fn = self.test_on_validation()
+            training_stats["epoch"].append(epoch)
+            training_stats["avg_loss"].append(avg_loss)
+            training_stats["time"].append(epoch_end - epoch_start)
+            training_stats["avg_true_positives"].append(tp)
+            training_stats["avg_false_positives"].append(fp)
+            training_stats["avg_false_negatives"].append(fn)
+            print(f"Epoch {epoch}, Avg Loss: {avg_loss:.4f}, Time: {epoch_end - epoch_start:.2f} seconds, TP: {tp}, FP: {fp}, FN: {fn}")
 
         # Calculate the total training time
         total_time = time.time() - start_time
@@ -124,7 +140,56 @@ class Trainer:
 
         # Save the trained model
         self.save_model()
-
+        
+        # # save the training stats as a csv file
+        # training_stats_df = pd.DataFrame(training_stats)
+        # training_stats_df.to_csv("training_stats.csv", index=False)
+        
+        # create a training figure
+        fig, ax = TrainingFigureGenerator.create_training_figure(training_stats)
+        fig.savefig("./training_figure.png")
+        
     def save_model(self):
         torch.save(self.model.state_dict(), self.output_model_path)
         print(f"Model saved to '{self.output_model_path}'")
+
+    def test_on_validation(self):
+        loader = BatchFileLoader(self.cpu_count)
+        eventlogs = loader.load_all_eventlogs(self.validation_data_dir)
+        petrinets = loader.load_all_petrinets(self.validation_data_dir)
+        
+        total_tp = 0
+        total_fp = 0
+        total_fn = 0
+        num_graphs = 0
+        
+        self.model.eval()
+        with torch.no_grad():
+            for id, petrinet in petrinets.items():
+                if id in eventlogs:
+                    eventlog = eventlogs[id]
+                    graph_builder = GraphBuilder(eventlog)
+                    graph = graph_builder.build_petrinet_graph()
+                    ground_truth_graph = graph_builder.annotate_petrinet_graph(graph, petrinet)
+                    ground_truth_pn = PetriNet.from_graph(ground_truth_graph)
+                    # discovered graph
+                    discovered_graph = do_inference(graph, deepcopy(self.model), self.device)
+                    discovered_pn = PetriNet.from_graph(discovered_graph)
+                    # Compare the discovered graph with the ground truth graph
+                    true_positives, false_positives, false_negatives = compare_discovered_pn_to_true_pn(discovered_pn, ground_truth_pn)
+        
+                    # Calculate precision, recall, and F1 score
+                    # precision = true_positives / (true_positives + false_positives)
+                    # recall = true_positives / (true_positives + false_negatives)
+                    # try: # Avoid division by zero
+                    #     f1_score = 2 * (precision * recall) / (precision + recall)
+                    # except ZeroDivisionError:
+                    #     f1_score = 0.0
+                    total_tp += true_positives
+                    total_fp += false_positives
+                    total_fn += false_negatives
+                    num_graphs += 1
+        self.model.train()
+        return total_tp / num_graphs, total_fp / num_graphs, total_fn / num_graphs
+                    
+        

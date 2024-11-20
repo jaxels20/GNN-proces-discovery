@@ -59,7 +59,7 @@ class Discovery:
         graph_builder = GraphBuilder(eventlog=event_log, length=eventually_follows_length)
         graph = graph_builder.build_petrinet_graph()
         
-        graph = do_inference(graph, model)
+        graph = do_inference(graph, model, device=torch.device('cpu'))
         discovered_pn = PetriNet.from_graph(graph)
         return discovered_pn
 

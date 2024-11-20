@@ -10,7 +10,7 @@
         "max": 12,
         "silent": 0.2,
         "duplicate": 0,
-        "no_models": 1000
+        "no_models": 100
     },
     "log_generation": {
         "num_traces": 100

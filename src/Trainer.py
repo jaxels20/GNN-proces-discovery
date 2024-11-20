@@ -44,6 +44,7 @@ class Trainer:
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "mps" if torch.has_mps else "cpu"
         )
+        self.device = torch.device("cpu")
         print(f"Training on device: {self.device}")
 
         # Initialize model, optimizer, and loss function
@@ -55,7 +56,7 @@ class Trainer:
         ).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         self.criterion = torch.nn.BCEWithLogitsLoss(
-            pos_weight=torch.tensor([50.0], device=self.device)
+            pos_weight=torch.tensor([10.0], device=self.device)
         )
 
     def train_epoch(self, batch_loader):
@@ -194,6 +195,11 @@ class Trainer:
                     total_fn += false_negatives
                     num_graphs += 1
         self.model.train()
+        
+        # TP: The places that are present in both the discovered and ground truth Petri nets
+        # FP: The places that are present in the discovered Petri net but not in the ground truth Petri net
+        # FN: The places that are present in the ground truth Petri net but not in the discovered Petri net
+        
         return total_tp / num_graphs, total_fp / num_graphs, total_fn / num_graphs
                     
         

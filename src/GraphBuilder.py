@@ -33,6 +33,12 @@ class GraphBuilder:
         graph['selected_nodes'][~graph['place_mask']] = 1
         # Convert all attributes to PyTorch tensors
         graph = self._attributes_to_tensor(graph)
+        
+        # Throw a warning and return None if the graph has no edges
+        if graph.edge_index.size(0) == 0:
+            print(f"Warning: The graph has no edges.")
+            return None
+
 
         return graph
 

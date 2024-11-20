@@ -66,7 +66,7 @@ class GraphBuilder:
             # Node feature - use column from the footprint matrix. choice=0, parallel=1, eventually follows=2
             alpha_relations = [
                 alpha_relation_map.get(self.footprint_matrix[(activity, target)])
-                for target in self.eventlog.get_all_activities()
+                for target in sorted(self.eventlog.get_all_activities())
             ]
             alpha_relations += [0] * (64 - len(alpha_relations))   # pad remaining entries with 0
             data['node_x'].append(torch.tensor(alpha_relations, dtype=torch.float))

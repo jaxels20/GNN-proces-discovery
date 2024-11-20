@@ -75,6 +75,8 @@ class Trainer:
                     eventlog = eventlog_batch[id]
                     graph_builder = GraphBuilder(eventlog)
                     graph = graph_builder.build_petrinet_graph()
+                    if graph is None:
+                        continue
                     graph = graph_builder.annotate_petrinet_graph(graph, petrinet)
                     pyg_graphs.append(graph)
 
@@ -170,6 +172,9 @@ class Trainer:
                     eventlog = eventlogs[id]
                     graph_builder = GraphBuilder(eventlog)
                     graph = graph_builder.build_petrinet_graph()
+                    if graph is None:
+                        continue
+                                       
                     ground_truth_graph = graph_builder.annotate_petrinet_graph(graph, petrinet)
                     ground_truth_pn = PetriNet.from_graph(ground_truth_graph)
                     # discovered graph

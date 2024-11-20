@@ -155,7 +155,7 @@ if __name__ == "__main__":
     # check if the input directory exists
     os.makedirs(INPUT_DIR, exist_ok=True)
     tree_gen_config, log_gen_config = load_parameters(CONFIG_FILE)
-    pts = generate_process_trees(INPUT_DIR, tree_gen_config)
+    pts = generate_process_trees(OUTPUT_DIR, tree_gen_config)
     generate_logs(pts, OUTPUT_DIR, log_gen_config)
 
     print("Data generation completed.")

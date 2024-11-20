@@ -1,16 +1,8 @@
-import torch
-import time
-from src.EventLog import EventLog
-from src.GraphBuilder import GraphBuilder
-from src.PetriNet import PetriNet, Place, Transition, Arc
-from src.Models import GNNWithClassifier
-from src.BatchFileLoader import BatchFileLoader
-from torch_geometric.loader import DataLoader
 from src.Trainer import Trainer
-EPOCHS = 2
-NUM_WORKERS = 2
-BATCH_SIZE_LOAD = 10
-BATCH_SIZE_TRAIN = 2
+EPOCHS = 5
+NUM_WORKERS = 64
+BATCH_SIZE_LOAD = 500
+BATCH_SIZE_TRAIN = 100
 SHUFFLE = True
 DATA_DIR = "./data_generation/synthetic_data/"
 OUTPUT_MODEL_PATH = "models/graph_sage_model_with_dense_classifier.pth"

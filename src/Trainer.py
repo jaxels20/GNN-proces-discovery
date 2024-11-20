@@ -67,7 +67,6 @@ class Trainer:
             batch_loader.batch_petrinet_loader(self.train_data_dir, self.batch_size_load),
         ):
             pyg_graphs = []
-            
 
             # Build and annotate graphs for the current batch
             for id, petrinet in petrinet_batch.items():
@@ -82,7 +81,7 @@ class Trainer:
             data_loader = DataLoader(
                 pyg_graphs,
                 batch_size=self.batch_size_train,
-                shuffle=True,  # You can make `shuffle` configurable
+                shuffle=True,
                 pin_memory=True,
                 num_workers=self.cpu_count,
             )

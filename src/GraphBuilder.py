@@ -16,27 +16,21 @@ class GraphBuilder:
     
     def build_petrinet_graph(self):
         """ Build a Petri net graph from an event log """
-        
         data = self._initialize_graph_data()
-        
+        # Add all activities as transition nodes in the graph
         data = self._add_transition_nodes(data)
-        # add candidate places
+        # Add candidate places
         data = self.add_candidate_places(data)
         # Assign data to the graph
         graph = self._assign_data_to_graph(data)  
         # Correct the edge index format
         graph.edge_index = torch.tensor(data['edges'], dtype=torch.long).t().contiguous()
-        
-        
         # Create a mask for the place nodes
         graph['place_mask'] = torch.tensor([nt == 'place' for nt in graph['node_types']], dtype=torch.bool)
         # Populate the selected_nodes attribute with 0 for all nodes
         graph['selected_nodes'] = torch.zeros(len(graph['node_x']), dtype=torch.bool)
-        
         # mark all transitions as 1 in the selected_nodes attribute use the place_mask to select only transitions
         graph['selected_nodes'][~graph['place_mask']] = 1
-        
-        
         # Convert all attributes to PyTorch tensors
         graph = self._attributes_to_tensor(graph)
 
@@ -86,8 +80,8 @@ class GraphBuilder:
         # reformat node_x to be a tensor of shape (num_nodes, 64)
         data['node_x'] = torch.stack(data['node_x'])
         data['labels'] = torch.tensor(data['labels'], dtype=torch.float)
-        data['selected_nodes'] = torch.tensor(data['selected_nodes'], dtype=torch.bool)
-        data['place_mask'] = torch.tensor(data['place_mask'], dtype=torch.bool)
+        data['selected_nodes'] = data['selected_nodes'].clone().detach().bool()
+        data['place_mask'] = data['place_mask'].clone().detach().bool()
         
         return data
 

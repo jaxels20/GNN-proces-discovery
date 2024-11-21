@@ -1,6 +1,6 @@
 from src.Trainer import Trainer
-EPOCHS = 5
-NUM_WORKERS = 4
+EPOCHS = 30
+NUM_WORKERS = 7
 BATCH_SIZE_LOAD = 100
 BATCH_SIZE_TRAIN = 50
 SHUFFLE = True

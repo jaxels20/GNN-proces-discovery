@@ -7,16 +7,20 @@ from pm4py.visualization.petri_net.visualizer import apply as pn_visualizer
 from pm4py.objects.conversion.process_tree import converter as pt_converter
 
 import sys 
+import os
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
+
+from src.PetriNet import PetriNet
 
 
 def process_tree_fig():
     # Step 1: Define activity nodes
-    activity_a = ProcessTree(label="A")  # Activity node labeled "A"
-    activity_b = ProcessTree(label="B")  # Activity node labeled "B"
-    activity_c = ProcessTree(label="C")  # Activity node labeled "C"
-    activity_d = ProcessTree(label="D")  # Activity node labeled "D"
-    activity_e = ProcessTree(label="E")  # Activity node labeled "E"
-    activity_f = ProcessTree(label="F")  # Activity node labeled "F"
+    activity_a = ProcessTree(label="a")  # Activity node labeled "A"
+    activity_b = ProcessTree(label="b")  # Activity node labeled "B"
+    activity_c = ProcessTree(label="c")  # Activity node labeled "C"
+    activity_d = ProcessTree(label="d")  # Activity node labeled "D"
+
 
     # Step 2: Create the root node with SEQUENCE operator
     root_node = ProcessTree(operator=Operator.SEQUENCE)
@@ -49,7 +53,7 @@ def process_tree_fig():
     # set the rankdir to be from left to right
     gviz.attr(
         rankdir='TB',
-        size= f'{const.DOUBLE_COL_FIG_WIDTH},{const.DOUBLE_COL_FIG_HEIGHT}!',
+        size= f'{const.FIG_WIDTH},{const.FIG_HEIGHT}!',
               )
     
 
@@ -61,18 +65,19 @@ def process_tree_fig():
 def petri_net_fig(tree: ProcessTree):
     # Step 1: Convert the Process Tree to a Petri Net
     net, initial_marking, final_marking = pt_converter.apply(tree)
-    
+    our_net = PetriNet.from_pm4py(net)
     
     # Step 2: Visualize the Petri Net
-    gviz = pn_visualizer(net, initial_marking, final_marking)
+    gviz = our_net.get_visualization("pdf", True)
     
     gviz.attr(
-        rankdir='TB',
-        size= f'{const.SINGLE_COL_FIG_WIDTH},{const.SINGLE_COL_FIG_HEIGHT}!',
+        rankdir='LR',
+        size= f'{const.FIG_WIDTH},{const.FIG_HEIGHT}!',
         dpi=str(const.DPI),
         fontname=const.FONT_FAMILY,
         fontsize=str(const.FONT_SIZE),
-        bgcolor='white'  # Or another color to match `plt.style`
+        bgcolor='white',  # Or another color to match `plt.style`
+        margin='0,0,0,0'
         )
     
     # Step 3: Save the Petri Net as a PDF

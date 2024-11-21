@@ -203,7 +203,7 @@ class PetriNet:
             output_place = self.get_place_by_name(arc.target)
             output_place.add_tokens(arc.weight)
 
-    def visualize(self, filename="petri_net", format="pdf", report_ready=False):
+    def visualize(self, filename="petri_net", format="pdf", random_place_naming=False):
         """
         Visualize the Petri net and save it as a PNG file using Graphviz.
 
@@ -213,28 +213,34 @@ class PetriNet:
             The base filename for the output file (without extension).
         format : str
             The format for the output file (e.g., 'png', 'pdf').
-        
-        report_ready : bool
-            If True, it makes the visualization more suitable for reports.
         """
-        dot = Digraph(comment="Petri Net", format=format)
-        
-        if report_ready:
-            dot.attr(rankdir="TD")
-            dot.attr(size=f"{constants.DOUBLE_COL_FIG_WIDTH},{constants.DOUBLE_COL_FIG_HEIGHT}")
-            dot.attr(dpi=str(constants.DPI))
-            dot.attr(fontsize=str(constants.FONT_SIZE))
-            dot.attr(fontname=constants.FONT_FAMILY)
+        dot = self.get_visualization(format=format, random_place_naming=random_place_naming)
 
+        output_path = dot.render(filename, cleanup=True, format=format)
+        print(f"Petri net saved as {output_path}")
+
+    def get_visualization(self, format, random_place_naming=False):
+        dot = Digraph(comment="Petri Net", format=format)
+        curr_place_id = 0
+        
         for place in self.places:            
-            if report_ready:
-                label = f"Tokens: {place.tokens}"
-                color = "black"
-                style = "rounded"
+            color = "black"
+            style = "rounded"
+            
+            if not random_place_naming:
+                    label = place.name
+            elif place.name == "start" or place.name == "source":
+                label = "Start"
+            elif place.name == "end" or place.name == "sink":
+                label = "End"
             else:
-                label = f"{place.name}\nTokens: {place.tokens}"
-                color = "lightblue"
-                style = "filled"
+                label = f"p{curr_place_id}"
+                curr_place_id += 1
+
+
+            if place.tokens > 0:
+                label += f"\nTokens: {place.tokens}"
+
             
             dot.node(
                 place.name,
@@ -245,10 +251,18 @@ class PetriNet:
             )
 
         for transition in self.transitions:
-            
-            color = "black" if report_ready else "lightgreen"
-            style = "" if report_ready else "filled"
-            
+
+            # if the transition is a tau transition, color it black and fill it
+            if transition.name.startswith("tau"):
+                color = "black"
+                style = "filled"
+                label = ""
+            else:
+                # if the transition is not a tau transition, color it black and do not fill it
+                color = "black"
+                style = ""
+                label = transition.name
+                
             
             dot.node(
                 transition.name,
@@ -259,12 +273,10 @@ class PetriNet:
             )
 
         for arc in self.arcs:
-            edge_label = None if report_ready else str(arc.weight)
+            edge_label = "" #str(arc.weight)
             dot.edge(arc.source, arc.target, label=edge_label)
 
-
-        output_path = dot.render(filename, cleanup=True, format=format)
-        print(f"Petri net saved as {output_path}")
+        return dot
 
     def get_start_place(self):
         """Return the start places (no incoming arcs), or None if none exists."""

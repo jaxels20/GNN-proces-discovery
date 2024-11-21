@@ -50,7 +50,7 @@ def simple_sequence(output_dir: str) -> None:
     petri_net.add_arc("B->C", "C")
     petri_net.add_arc("C", "End")
     
-    petri_net.visualize(f"{output_dir}{sub_folder_name}petri_net", report_ready=True)
+    petri_net.visualize(f"{output_dir}{sub_folder_name}petri_net")
     petri_net.to_ptml(f"{output_dir}{sub_folder_name}petri_net.ptml")
 
 # TEST CASE 2: A simple XOR split

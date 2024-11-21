@@ -1,4 +1,4 @@
-from EventLog import EventLog
+from src.EventLog import EventLog
 
 class TraceListExporter():
     @staticmethod

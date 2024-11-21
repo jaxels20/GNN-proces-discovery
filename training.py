@@ -1,12 +1,10 @@
 from src.Trainer import Trainer
-EPOCHS = 5
-NUM_WORKERS = 4
-BATCH_SIZE_LOAD = 100
+EPOCHS = 30
+NUM_WORKERS = 128
+BATCH_SIZE_LOAD = 1000
 BATCH_SIZE_TRAIN = 50
-SHUFFLE = True
 DATA_DIR = "./data_generation/synthetic_data/"
-OUTPUT_MODEL_PATH = "models/graph_sage_model_with_dense_classifier.pth"
-
+OUTPUT_MODEL_PATH = "models/graph_sage_model_with_dense_classifier_1.pth"
 
 
 if __name__ == "__main__":

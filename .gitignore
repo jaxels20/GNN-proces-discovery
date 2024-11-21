@@ -164,3 +164,4 @@ cython_debug/
 
 real_life_datasets/
 data_generation/synthetic_data/
+data_generation/visualizations/

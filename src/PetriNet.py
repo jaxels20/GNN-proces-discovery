@@ -170,7 +170,6 @@ class PetriNet:
         """Return the transitions that have an arc from the place."""
         return [self.get_transition_by_name(arc.target) for arc in self.arcs if arc.source == place_name]
 
-
     def is_transition_enabled(self, transition_name: str) -> bool:
         """
         Check if a transition is enabled. A transition is enabled if all its input places have enough tokens.

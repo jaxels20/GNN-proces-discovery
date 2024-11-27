@@ -8,7 +8,7 @@ from torch_geometric.data import Data
 import torch
 
 INPUT_DIR = "./controlled_scenarios/"  # Assume structured like this "./controlled_scenarios/dataset_name/"
-OUTPUT_DIR = "./con_scenarios_candidate_analysis_results/"  # Directory to save CSV file
+OUTPUT_DIR = "./candidate_analysis_results/"  # Directory to save CSV file
 RESULTS_FILE = os.path.join(OUTPUT_DIR, "results.csv")
 
 
@@ -88,6 +88,9 @@ if __name__ == "__main__":
         try:
             eventlog = eventlogs[scenario]
             petrinet = petrinets[scenario]
+            
+            #make scenario folder in candidate_analysis_results
+            os.makedirs(os.path.join(OUTPUT_DIR, scenario), exist_ok=True)
 
             # Perform comparison
             graphbuilder = GraphBuilder(eventlog)
@@ -95,6 +98,9 @@ if __name__ == "__main__":
             graph = select_all_places(graph)
             candidate_pn = PetriNet.from_graph(graph)
             true_positives, false_positives, false_negatives = compare_discovered_pn_to_true_pn(candidate_pn, petrinet)
+
+            # visualize the candidate petri net in the scenario folder
+            candidate_pn.visualize(os.path.join(OUTPUT_DIR, scenario, "candidate_pn"))
 
             # Append result for this scenario
             results.append({"Scenario": scenario, "True_positives": true_positives, "False_positives": false_positives, "False_negatives": false_negatives, "Precision": true_positives / (true_positives + false_positives), "Recall": true_positives / (true_positives + false_negatives)})

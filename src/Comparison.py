@@ -37,6 +37,7 @@ def compare_discovered_pn_to_true_pn(candidate_pn: PetriNet, true_pn: PetriNet):
                 found_false_negative = False
         if found_false_negative:
             false_negatives += 1
+            
 
 
     return true_positives, false_positives, false_negatives

@@ -6,10 +6,14 @@ from src.GraphBuilder import GraphBuilder
 from src.Comparison import compare_discovered_pn_to_true_pn
 from torch_geometric.data import Data
 import torch
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 INPUT_DIR = "./controlled_scenarios/"  # Assume structured like this "./controlled_scenarios/dataset_name/"
 OUTPUT_DIR = "./candidate_analysis_results/"  # Directory to save CSV file
 RESULTS_FILE = os.path.join(OUTPUT_DIR, "results.csv")
+RESULTS_PDF = os.path.join(OUTPUT_DIR, "results.pdf")
 
 
 def select_all_places(graph: Data) -> Data:
@@ -52,6 +56,34 @@ class FileLoader:
         except Exception as e:
             raise ValueError(f"Failed to load Petri net from {petrinet_path}: {e}")
         return pn
+
+def save_csv_to_pdf(csv_path, pdf_path):
+    # Step 0: Read the CSV file into a DataFrame
+    df = pd.read_csv(csv_path)
+
+    # sort df by scenario name
+    df = df.sort_values(by="Scenario")
+
+    # Step 1: Create a PDF file with pages for each group or the entire dataset
+    with PdfPages(pdf_path) as pdf:
+        # Create a figure for the entire dataset
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.axis('off')  # Turn off the axis
+        
+        # Add a title for the dataset
+        fig.suptitle("Results Table", fontsize=14, fontweight='bold')
+        
+        # Format the DataFrame data as a table
+        table_data = df.values
+        column_headers = df.columns
+        
+        # Add the table to the figure
+        ax.table(cellText=table_data, colLabels=column_headers, loc='center', cellLoc='center')
+        
+        # Adjust layout and save this page to the PDF
+        plt.tight_layout()
+        pdf.savefig(fig)
+        plt.close(fig)
 
 
 if __name__ == "__main__":
@@ -107,12 +139,9 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Error processing scenario {scenario}: {e}")
 
-    # Save results to CSV
-    with open(RESULTS_FILE, mode="w", newline="") as csvfile:
-        fieldnames = ["Scenario", "True_positives", "False_positives", "False_negatives", "Precision", "Recall"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        writer.writeheader()  # Write column names
-        writer.writerows(results)  # Write scenario results
-
+    # Save results to a dataframe
+    df = pd.DataFrame(results)
+    df.to_csv(RESULTS_FILE, index=False)
     print(f"Results saved to {RESULTS_FILE}")
+
+    save_csv_to_pdf(RESULTS_FILE, RESULTS_PDF)

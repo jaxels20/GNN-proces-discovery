@@ -18,8 +18,8 @@ def select_all_places(graph: Data) -> Data:
 
 
 if __name__ == "__main__":
-    eventlog = EventLog.load_xes("./controlled_scenarios/simple_and_split/eventlog.xes")
-    petrinet = PetriNet.from_ptml("./controlled_scenarios/simple_and_split/petri_net.ptml")
+    eventlog = EventLog.load_xes("./controlled_scenarios/loop_lenght_2/eventlog.xes")
+    petrinet = PetriNet.from_ptml("./controlled_scenarios/loop_lenght_2/petri_net.ptml")
     graphbuilder = GraphBuilder(eventlog)
     graph = graphbuilder.build_petrinet_graph()
     graph = select_all_places(graph)

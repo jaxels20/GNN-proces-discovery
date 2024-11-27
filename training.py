@@ -1,6 +1,6 @@
 from src.Trainer import Trainer
-EPOCHS = 30
-NUM_WORKERS = 128
+EPOCHS = 1
+NUM_WORKERS = 4
 BATCH_SIZE_LOAD = 1000
 BATCH_SIZE_TRAIN = 50
 DATA_DIR = "./data_generation/synthetic_data/"

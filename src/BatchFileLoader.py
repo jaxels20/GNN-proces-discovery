@@ -45,8 +45,8 @@ class BatchFileLoader:
             # if int(file_id) > 1000:
             #     raise ValueError("Invalid ID")
         except:
-            # file_id = os.path.basename(file_path).removesuffix(".xes")
-            raise ValueError("Invalid ID")
+            file_id = os.path.basename(file_path).removesuffix(".xes")
+            el = EventLog.load_xes(file_path)
         return file_id, el
 
     def load_all_petrinets(self, input_dir: str):
@@ -79,6 +79,7 @@ class BatchFileLoader:
         all_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.endswith(".xes")]
         with Pool(processes=self.cpu_count) as pool:
             results = pool.map(self._load_eventlog, all_files)
+        
         return {file_id: el for file_id, el in results if file_id is not None}
 
     def batch_eventlog_loader(self, input_dir: str, batch_size: int):

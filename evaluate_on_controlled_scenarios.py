@@ -4,14 +4,14 @@ import os
 INPUT_DIR = "./controlled_scenarios/" # Assume structered like this "./controlled_scenarios/dataset_name/"
 OUTPUT_DIR = "./controlled_scenarios_results/" 
 METHODS = ["alpha", "heuristic", "inductive", "gnn"]
-NUM_WORKERS = 32
+NUM_WORKERS = 1
 
 if __name__ == "__main__":
     dataset_dirs = os.listdir(INPUT_DIR)
     # remove all files from the list
     dataset_dirs = [x for x in dataset_dirs if not os.path.isfile(f"{INPUT_DIR}{x}")]
     eventlogs = {} # name: eventlog
-    loader = BatchFileLoader(cpu_count=NUM_WORKERS)
+    loader = BatchFileLoader(cpu_count=1)
     for dataset_dir in dataset_dirs:
         temp_eventlogs = loader.load_all_eventlogs(f"{INPUT_DIR}{dataset_dir}")
         # check that there is only one event log in the directory

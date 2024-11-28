@@ -97,6 +97,9 @@ class Trainer:
 
             # Train on the current batch
             for batch_idx, batch in enumerate(data_loader):
+                self.criterion = torch.nn.BCEWithLogitsLoss(
+                    pos_weight=torch.tensor(torch.tensor(self.calculate_loss_weights(batch)), device=self.device)
+                )
                 batch = batch.to(self.device)
                 self.optimizer.zero_grad()
 
@@ -222,3 +225,15 @@ class Trainer:
         # FN: The places that are present in the ground truth Petri net but not in the discovered Petri net
 
         return total_tp / num_graphs, total_fp / num_graphs, total_fn / num_graphs
+
+    def calculate_loss_weights(self, batch):
+        # Calculate the loss weights for the current batch
+        num_positive = 0
+        num_negative = 0
+        
+        num_positive = torch.sum(batch["labels"])
+        num_negative = batch["labels"].size(0) - num_positive
+        
+        total = num_positive + num_negative
+        pos_weight = torch.tensor([num_negative / total], device=self.device)
+        return pos_weight

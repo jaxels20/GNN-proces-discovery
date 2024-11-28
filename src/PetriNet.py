@@ -228,7 +228,7 @@ class PetriNet:
             style = "rounded"
             
             if not random_place_naming:
-                    label = place.name
+                label = place.name
             elif place.name == "start" or place.name == "source":
                 label = "Start"
             elif place.name == "end" or place.name == "sink":

@@ -3,16 +3,16 @@
         "sequence": 0.2,
         "choice": 0.2,
         "parallel": 0.2,
-        "loop": 0.2,
-        "or": 0.2,
+        "loop": 0.0,
+        "or": 0.0,
         "mode": 4,
         "min": 2,
         "max": 8,
         "silent": 0,
         "duplicate": 0,
-        "no_models": 5000
+        "no_models": 100
     },
     "log_generation": {
-        "num_traces": 20
+        "num_traces": 40
     }
 }

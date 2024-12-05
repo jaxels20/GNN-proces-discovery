@@ -90,10 +90,11 @@ class MultiEvaluator:
         self.event_logs = event_logs # dictionary of event logs with keys as event log names and values as EventLog objects
         self.petri_nets = {method: {} for method in methods} # dictionary of Petri nets with keys as discovery methods 
         # and values a dict of event log names and PetriNet objects
-        
         for method in methods:
             for event_log_name, event_log in self.event_logs.items():
-                self.petri_nets[method][event_log_name] = Discovery.run_discovery(method, event_log)
+                pn_result = Discovery.run_discovery(method, event_log)
+                if pn_result is not None:   # check needed since gnn miner sometimes doesnt work => returns None
+                    self.petri_nets[method][event_log_name] = pn_result
         
     def evaluate_all(self, num_cores=None):
             """

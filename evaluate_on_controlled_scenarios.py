@@ -1,9 +1,11 @@
 from src.BatchFileLoader import BatchFileLoader
+from gnn_miner.process_mining.process_discovery import GnnMiner
 from src.Evaluator import MultiEvaluator
 import os
 INPUT_DIR = "./controlled_scenarios/" # Assume structered like this "./controlled_scenarios/dataset_name/"
 OUTPUT_DIR = "./controlled_scenarios_results/" 
-METHODS = ["alpha", "heuristic", "inductive", "gnn"]
+METHODS = ["gnn_miner"]
+METHODS = ["alpha", "heuristic", "inductive", "gnn_miner", "aau_miner"]
 NUM_WORKERS = 1
 
 if __name__ == "__main__":

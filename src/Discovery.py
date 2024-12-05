@@ -3,18 +3,23 @@
 from src.EventLog import EventLog
 from src.PetriNet import PetriNet
 from src.Models import GNNWithClassifier
+from gnn_miner.process_mining.process_discovery import GnnMiner   # GNN miner used in paper
 import torch
 from src.GraphBuilder import GraphBuilder
 from src.inference import do_inference
+from gnn_miner.data_handling.log import LogHandler
 
+import os
+import shutil
 from pm4py.algo.discovery.alpha.algorithm import apply as pm4py_alpha_miner
 from pm4py.algo.discovery.heuristics.algorithm import apply as pm4py_heuristic_miner
 from pm4py.algo.discovery.inductive.algorithm import apply as pm4py_inductive_miner
 from pm4py.objects.conversion.process_tree import converter as pt_converter
-
+BEAM_WIDTH = 3
+BEAM_LENGTH = 2
+TOP_X_TRACES = 1000
 
 class Discovery:
-
     @staticmethod
     def alpha_miner(event_log: EventLog) -> PetriNet:
         """
@@ -50,7 +55,7 @@ class Discovery:
         return net
 
     @staticmethod
-    def GNN_miner(event_log: EventLog, model_path: str = "./models/graph_sage_model_with_dense_classifier.pth", eventually_follows_length: int = 1) -> PetriNet:
+    def AAU_miner(event_log: EventLog, model_path: str = "./models/graph_sage_model_with_dense_classifier.pth", eventually_follows_length: int = 1) -> PetriNet:
         # Load the model
         model = GNNWithClassifier(input_dim=64, hidden_dim=16, output_dim=1, dense_hidden_dim=32)
         model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
@@ -62,13 +67,51 @@ class Discovery:
         graph = do_inference(graph, model, device=torch.device('cpu'))
         discovered_pn = PetriNet.from_graph(graph)
         return discovered_pn
+    
+    @staticmethod
+    def GNN_miner(event_log: EventLog, model_path: str = "./gnn_miner/ml_models/models/model_candidates_frequency_new_036.pth") -> PetriNet:
+        # Define the temporary directory
+        temp_dir = "./controlled_scenarios/temp_npz"
+        os.makedirs(temp_dir, exist_ok=True)
+
+        try:
+            # Create npz file of the event log
+            pm4py_event_log = event_log.to_pm4py()
+            log_handler = LogHandler('', fLog=pm4py_event_log)
+            log_handler.getVariants()
+            temp_npz_path = os.path.join(temp_dir, "npz_temp")
+            log_handler.exportVariantsLog(temp_npz_path)
+
+            # Load the model
+            model = GnnMiner(fLogFilename=temp_npz_path, model_filename=model_path, embedding_size=21, embedding_strategy="onehot")
+
+            # Discover the Petri net
+            options = {
+                "beam_width": BEAM_WIDTH,
+                "beam_length": BEAM_LENGTH,
+                "number_of_petrinets": 1,
+                "export": "",
+                "length_normalization": False,
+                "timeout": None,
+                "topXTraces": TOP_X_TRACES,
+            }
+            model.discover(conformance_check=False, **options)
+            if model.mNet is not None:
+                discovered_pn = PetriNet.from_pm4py(model.mNet)
+                return discovered_pn
+        finally:
+            # Clean up the temporary directory
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+
 
     # Map method names to static methods
     methods = {
         "alpha": alpha_miner,
         "heuristic": heuristic_miner,
         "inductive": inductive_miner,
-        "gnn": GNN_miner
+        "aau_miner": AAU_miner,
+        "gnn_miner": GNN_miner
     }
 
     @classmethod
@@ -77,7 +120,7 @@ class Discovery:
         Runs the specified discovery method based on method_name.
         
         Parameters:
-        - method_name (str): The name of the method to run (e.g., "alpha", "heuristic", "inductive", "GNN").
+        - method_name (str): The name of the method to run (e.g., "alpha", "heuristic", "inductive", "aau_miner", "gnn_miner").
         - event_log (EventLog): The event log to be passed to the discovery method.
         - **kwargs: Additional arguments to be passed to the method, such as model_path for GNN_miner.
         
@@ -90,9 +133,6 @@ class Discovery:
         
         # Call the appropriate method, passing **kwargs for any extra arguments needed
         return method(event_log, **kwargs)
-    
-    
-    
     
     
     

@@ -13,29 +13,6 @@ class AlphaRelations:
     self.causal_relations = self.__get_causal_relations()
     self.parallel_relations = self.__get_parallel_relations()
 
-  def get_matrix(self, names=False):
-    from prettytable import PrettyTable
-    legend = list(self.transition_mapping.values()) if names else list(self.transition_mapping.keys())
-
-    matrix = [[''] + legend]
-    for t in legend:
-      matrix.append([t] + ['#'] * len(legend))
-
-    for t1, t2 in self.directly_follows_relations:
-      matrix[t1 + 1][t2 + 1] = '-'
-
-    for t1, t2 in self.causal_relations:
-      matrix[t1 + 1][t2 + 1] = '>'
-
-    for t1, t2 in self.parallel_relations:
-      matrix[t1 + 1][t2 + 1] = '||'
-
-    table = PrettyTable(matrix[0])
-    for row in matrix[1:]:
-      table.add_row(row)
-
-    return matrix, table
-
   def __add_start_end(self):
     newvariants = []
     for variant in self.variants:

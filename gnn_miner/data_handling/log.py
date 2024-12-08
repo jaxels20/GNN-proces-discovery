@@ -112,7 +112,7 @@ class LogHandler:
       self.mVariants.append({'count': int(count), 'variant': variant})
 
   def getMostFrequentVariants(self, percentage, minimum_variants=np.inf, maximum_variants=np.inf):
-    print('Nr of variants', len(self.mVariants))
+    # print('Nr of variants', len(self.mVariants))
     if len(self.mVariants) <= minimum_variants:
       return self.mVariants
 

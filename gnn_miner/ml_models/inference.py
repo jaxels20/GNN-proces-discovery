@@ -121,16 +121,16 @@ class Inference:
       try:
         while not all_done and i < max_number_of_places:
           timings.append(time.time() - start_time)
-          print(f'TOOK {timings[-1]:.3f} seconds')
+          # print(f'TOOK {timings[-1]:.3f} seconds')
           if timeout is not None:
             if sum(timings) > timeout:
               print(f'TIMEOUT {timeout} seconds...')
               break
           start_time = time.time()
           beam_width_ = max(min_beamwidth, beam_width_ - 1) if beam_width < 0 else beam_width
-          print(beam_width_)
+          # print(beam_width_)
           scores = []
-          print(Fore.BLUE, i, Style.RESET_ALL)
+          # print(Fore.BLUE, i, Style.RESET_ALL)
           i += 1
 
           all_done = True
@@ -149,18 +149,18 @@ class Inference:
                 add_place = False
 
               connected, in_unconnected_transitions, out_unconnected_transitions = model._check_connectedness(data[model]['graph'], data[model]['chosen'])
-              print(Fore.YELLOW, add_place, probability, connected, Style.RESET_ALL)
+              # print(Fore.YELLOW, add_place, probability, connected, Style.RESET_ALL)
               probability = probability.item()
               if not add_place:
                 if connected:
-                  print(Fore.YELLOW, 'done', Style.RESET_ALL)
+                  # print(Fore.YELLOW, 'done', Style.RESET_ALL)
                   data[model]['done'] = True
                   probability = 1 - probability
                 elif not data[model]['wanttobedone']:
                   data[model]['wanttobedone'] = True
                   silent_indices = range(number_of_non_candidates + number_of_places, data[model]['graph'].number_of_nodes())
                   data[model]['graph'].nodes[silent_indices].data['silent_np'] = th.tensor([1] * len(silent_indices), device=self.device)
-                  print(Fore.RED, 'want to be done. set silent_np=1 for each and every node', Style.RESET_ALL)
+                  # print(Fore.RED, 'want to be done. set silent_np=1 for each and every node', Style.RESET_ALL)
 
               data[model]['score'] += np.log(probability)
               if data[model]['done']:
@@ -168,7 +168,7 @@ class Inference:
                 continue
 
               if len(sorted_scores) >= beam_width_ and sorted_scores[beam_width_ - 1] < -data[model]['score']:
-                print('prune')
+                # print('prune')
                 continue
 
               sorted_candidates, probabilities, h = model.forward_step(data[model]['graph'], data[model]['h'], number_of_non_candidates)
@@ -186,10 +186,8 @@ class Inference:
                   # Only choose places that connect 'unconnected' transitions.
                   in_neighbors, out_neighbors = model._get_neighbors(data[model]['graph'], number_of_non_candidates + candidate)
                   if len(in_neighbors & out_unconnected_transitions) == 0 and len(out_neighbors & in_unconnected_transitions) == 0:
-                    print(Fore.RED, 'Cant choose this one since it doesnt connect to an unconnected transition', Style.RESET_ALL)
+                    # print(Fore.RED, 'Cant choose this one since it doesnt connect to an unconnected transition', Style.RESET_ALL)
                     continue
-                  else:
-                    print('Found one')
                 elif data[model]['wanttobedone'] and not connected:
                   print(Fore.MAGENTA, 'BFS failed', Style.RESET_ALL)
 
@@ -197,7 +195,7 @@ class Inference:
                 if s_coverable: # or data[model]['wanttobedone']:
                   score = float('-inf') if probabilities[candidate] == 0 else data[model]['score'] + np.log(probabilities[candidate])
                   if len(sorted_scores) >= beam_width_ and sorted_scores[beam_width_ - 1] < -score:
-                    print('prune 2')
+                    # print('prune 2')
                     break
                   bisect.insort(sorted_scores, -score)
                   scores.append(Score(index, candidate, score, h))
@@ -220,7 +218,7 @@ class Inference:
           for best_score in best_scores:
             chosen_candidate = best_score.top_candidate
             chosen = data[models[best_score.index]]['chosen'] + ([chosen_candidate] if chosen_candidate is not None else [])
-            print(Fore.GREEN, chosen, best_score.score, data[models[best_score.index]]['done'], Style.RESET_ALL)
+            # print(Fore.GREEN, chosen, best_score.score, data[models[best_score.index]]['done'], Style.RESET_ALL)
             if best_score.score == float('-inf'):
               continue
             # Create new model copies if necessary
@@ -238,8 +236,6 @@ class Inference:
               h = best_score.h
               if chosen_candidate < number_of_places and not new_data[new_models[-1]]['wanttobedone']:
                 h = new_models[-1]._create_silent_transitions(copy_graph, best_score.h, chosen, number_of_places, (copy_graph.number_of_nodes() - number_of_non_candidates), pb.mAlphaRelations, end_transition_label)
-              elif chosen_candidate < number_of_places:
-                print('wanttobedone. will not be adding new silent candidates')
               new_data[new_models[-1]]['h'] = th.cat((h, copy_graph.nodes[:].data['decision'].reshape(copy_graph.number_of_nodes(), 1)), dim=1)
           models = new_models
           data = new_data
@@ -247,7 +243,7 @@ class Inference:
         pass
 
       timings = timings[1:]
-      print(f'Timings per beam search depth: mean {np.mean(timings):.3f}s, median {np.median(timings):.3f}s, min {np.min(timings):.3f}s, max {np.max(timings):.3f}s')
+      # print(f'Timings per beam search depth: mean {np.mean(timings):.3f}s, median {np.median(timings):.3f}s, min {np.min(timings):.3f}s, max {np.max(timings):.3f}s')
 
       results = []
       for result in data.values():
@@ -309,9 +305,7 @@ class Inference:
       places = [self.all_places[i] for i in result['predicted_place_indices'] if i < number_of_places]
       place_indices = [i for i, v in enumerate(result['predicted_place_indices']) if v < number_of_places]
       silent_transition_indices =  [i - number_of_places for i in result['predicted_place_indices'] if i >= number_of_places]
-      print(silent_transition_indices)
       silent_transitions = self.find_silent_transitions(places, silent_transition_indices)
-      print(silent_transitions)
       result['choice_probs'] = [choice_prob for index, choice_prob in enumerate(result['choice_probs']) if index in place_indices]
       result['add_probs']    = [choice_prob for index, choice_prob in enumerate(result['add_probs']) if index in place_indices] + [result['add_probs'][-1]]
       results.append({

@@ -4,9 +4,9 @@ from src.Evaluator import MultiEvaluator
 import os
 INPUT_DIR = "./controlled_scenarios/" # Assume structered like this "./controlled_scenarios/dataset_name/"
 OUTPUT_DIR = "./controlled_scenarios_results/" 
-METHODS = ["gnn_miner"]
 METHODS = ["alpha", "heuristic", "inductive", "gnn_miner", "aau_miner"]
-NUM_WORKERS = 1
+METHODS = ["alpha", "heuristic"]
+NUM_WORKERS = 4
 
 if __name__ == "__main__":
     dataset_dirs = os.listdir(INPUT_DIR)
@@ -25,5 +25,6 @@ if __name__ == "__main__":
     multi_evaluator = MultiEvaluator(eventlogs, methods=METHODS)
     results_df = multi_evaluator.evaluate_all(num_cores=NUM_WORKERS)
     results_df.to_csv(OUTPUT_DIR + "results.csv")
-    multi_evaluator.save_dataframe_to_pdf(results_df, OUTPUT_DIR + "results.pdf")
+    multi_evaluator.save_df_to_latex(results_df, OUTPUT_DIR, scenario="controlled")
+    multi_evaluator.save_df_to_pdf(results_df, OUTPUT_DIR + "results.pdf")
     multi_evaluator.export_petri_nets(OUTPUT_DIR, format="png")

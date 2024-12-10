@@ -329,7 +329,6 @@ class GraphBuilder:
           self.addPlace(net, [trace[fromTo[0]]], [trace[fromTo[1]]], fTraceId=(traceIndex, fromTo[0]))
     self.addXORPlaces(net, maximum_number_of_places)
     self.addCombinedXORPlaces(net)
-    print(self.mPossiblePlaces)
 
     return net
 

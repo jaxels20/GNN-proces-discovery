@@ -72,7 +72,7 @@ class GnnMiner(ProcessDiscovery):
 
     traces = [list(variant['variant']) for variant in variants]
     counts = [variant['count'] for variant in variants]
-    print(f'{len(self.mLogHandler.mVariants)} variants in original log, taking {len(traces)}.')
+    # print(f'{len(self.mLogHandler.mVariants)} variants in original log, taking {len(traces)}.')
 
     labels = [t for t in self.mLogHandler.mTransitions.keys()]
 
@@ -98,16 +98,16 @@ class GnnMiner(ProcessDiscovery):
 
     start_construction_time = time.time()
     pb = GraphBuilder(name, self.embedding_size, traces, counts, transitionLabels, fDepth=1, embedding_strategy=self.embedding_strategy, include_frequency=self.include_frequency, fPetrinetHandler=None)
-    print(f'Graph construction took: {time.time() - start_construction_time:.3f} seconds')
-    print('number of nodes', pb.mNet.number_of_nodes())
-    print('number of candidate places', len(pb.mPossiblePlaces))
+    # print(f'Graph construction took: {time.time() - start_construction_time:.3f} seconds')
+    # print('number of nodes', pb.mNet.number_of_nodes())
+    # print('number of candidate places', len(pb.mPossiblePlaces))
     beam_width = min(len(pb.mPossiblePlaces), beam_width)
     start_inference_time = time.time()
 
     results = self.model_inference.predict(pb, beam_width=beam_width, beam_length=beam_length, max_number_of_places=50,
                                            number_of_petrinets=number_of_petrinets, length_normalization=length_normalization,
                                            transitionLabels=transitionLabels, timeout=timeout)
-    print(f'Inference took: {time.time() - start_inference_time:.3f} seconds')
+    # print(f'Inference took: {time.time() - start_inference_time:.3f} seconds')
     
     petrinets_ids = []
     results = results[:number_of_petrinets]
@@ -119,8 +119,7 @@ class GnnMiner(ProcessDiscovery):
         continue
       
       petrinet_handler = PetrinetHandler()
-      print(f'Discovered {len(result["places"])} places and {len(result["silent_transitions"])} silent transitions '
-            f'({len(result["places"]) + len(result["silent_transitions"])})')
+      # print(f'Discovered {len(result["places"])} places and {len(result["silent_transitions"])} silent transitions 'f'({len(result["places"]) + len(result["silent_transitions"])})')
       
       petrinets_ids.append(petrinet_id)
       petrinet_handler.fromPlaces(result['places'], transitionLabels, None, fSilentTransitions=result['silent_transitions'])

@@ -19,9 +19,9 @@ class CandidateAnalyzer:
         
     def evaluate_candidate_places(self, eventlog: EventLog, petrinet: PetriNet, export_nets=False, id=None):
         """
-        Evaluate the candidate places in the petrinet graph
-        If export_nets is True, export the petrinet graphs to the output directory with the given id
-        return the number of true positives, false positives, and false negatives
+        Evaluate the candidate places in the petrinet graph.
+        If export_nets is True, export the petrinet graphs to the output directory with the given id.
+        Returns the number of true positives, false positives, and false negatives
         """
         
         graphbuilder = GraphBuilder(eventlog)
@@ -65,7 +65,7 @@ class CandidateAnalyzer:
         eventlogs = {}  # name: eventlog
         petrinets = {}  # name: petrinet
 
-           # Load all eventlogs and petrinets
+        # Load all eventlogs and petrinets
         for dataset_dir in dataset_dirs:
             dataset_path = os.path.join(self.input_dir, dataset_dir)
             try:
@@ -89,17 +89,17 @@ class CandidateAnalyzer:
                 
         for id, eventlog in eventlogs.items():
             petrinet = petrinets[id]
-            tp, fp, fn = self.evaluate_candidate_places(eventlog, petrinet)
+            tp, fp, fn = self.evaluate_candidate_places(eventlog, petrinet, export_nets=True, id=id)
             precision = tp / (tp + fp)
             recall = tp / (tp + fn)
             
             results.append(
-                {"Scenario": id, 
+                {"Scenario": id.replace("_", " "),
                  "True_positives": tp, 
                  "False_positives": fp, 
                  "False_negatives": fn, 
-                 "Precision": precision, 
-                 "Recall": recall}
+                 "Precision": round(precision, 3), 
+                 "Recall": round(recall, 3)}
                 )
             
         df = pd.DataFrame(results)
@@ -108,6 +108,9 @@ class CandidateAnalyzer:
         
         self.save_df_to_pdf(df, os.path.join(self.output_dir, "results.pdf"))
         print(f"Results saved to {os.path.join(self.output_dir, 'results.pdf')}")
+        
+        self.save_df_to_latex(df, os.path.join(self.output_dir, "results.tex"))
+        print(f"Results saved to {os.path.join(self.output_dir, 'results.tex')}")
      
     def evaluate_on_synthetic_data(self):
          # Make sure the output directory exists
@@ -171,4 +174,7 @@ class CandidateAnalyzer:
             plt.tight_layout()
             pdf.savefig(fig)
             plt.close(fig)
-            
+
+    def save_df_to_latex(self, df: pd.DataFrame, latex_path: str):
+        df = df.sort_values(by="Scenario")
+        df.to_latex(latex_path, bold_rows=True, index=False)

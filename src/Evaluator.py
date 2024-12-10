@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from concurrent.futures import ProcessPoolExecutor
 import copy
+import tabulate
 
 
 # This class can evaluate a discovered process model against an event log (only one!)
@@ -139,34 +140,118 @@ class MultiEvaluator:
                 else:
                     print(f"Invalid format: {format}. Must be 'png' or 'pdf'.")
                     break
-        
-    def save_dataframe_to_pdf(self, df, pdf_path):
-        # Step 2: Group the DataFrame by 'dataset'
+
+    def save_df_to_pdf(self, df, pdf_path):
+        """
+        Save the DataFrame to a single PDF figure with all datasets grouped.
+        """
+        table_data = []
+        column_headers = ["Dataset", "Method", "F1-Score", "Fitness", "Precision", "Generalization", "Simplicity"]
         grouped = df.groupby('dataset')
         
+        for dataset, group in grouped:
+            # Add the dataset name in the first row
+            for i, (_, row) in enumerate(group.iterrows()):
+                if i == 0:
+                    table_data.append([
+                        dataset,  # Dataset name printed only in the first row
+                        row['miner'],
+                        f"{row['f1_score']:.3f}",
+                        f"{row['log_fitness']:.3f}",
+                        f"{row['precision']:.3f}",
+                        f"{row['generalization']:.3f}",
+                        f"{row['simplicity']:.3f}",
+                    ])
+                else:
+                    table_data.append([
+                        "",  # Empty dataset name for subsequent rows
+                        row['miner'],
+                        f"{row['f1_score']:.3f}",
+                        f"{row['log_fitness']:.3f}",
+                        f"{row['precision']:.3f}",
+                        f"{row['generalization']:.3f}",
+                        f"{row['simplicity']:.3f}",
+                    ])
+
+        # Create the figure and add the table
+        fig, ax = plt.subplots(figsize=(12, len(table_data) * 0.3))
+        ax.axis('off')
+
+        # Add the table to the figure
+        table = ax.table(
+            cellText=table_data,
+            colLabels=column_headers,
+            loc='center',
+            cellLoc='center',
+            colLoc='center',
+        )
+
+        # Style the table
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.auto_set_column_width(col=list(range(len(column_headers))))
+
+        # Save the figure to the PDF
         with PdfPages(pdf_path) as pdf:
-            for dataset, group in grouped:
-                # Create a figure for each dataset
-                fig, ax = plt.subplots(figsize=(8, 6))
-                ax.axis('off')  # Turn off the axis
-                
-                # Add a title for the dataset
-                fig.suptitle(dataset, fontsize=14, fontweight='bold')
-                
-                # Format the group data as a table
-                metrics_table = group[['miner', 'simplicity', 'generalization', 'perc_fit_traces',
-                                    'average_trace_fitness', 'log_fitness', 'precision', 'f1_score']]
-                table_data = metrics_table.values
-                column_headers = metrics_table.columns
-                
-                # Add the table to the figure
-                ax.table(cellText=table_data, colLabels=column_headers, loc='center', cellLoc='center')
-                
-                # Adjust layout and save this page to the PDF
-                plt.tight_layout()
-                pdf.savefig(fig)
-                plt.close(fig)
+            pdf.savefig(fig)
+            plt.close(fig)
 
         print(f"PDF saved as {pdf_path}")
-    
-    
+        
+    def save_df_to_latex(self, df: pd.DataFrame, output_dir: str, scenario: str) -> None:
+        """
+        Save the DataFrame to a LaTeX table format.
+        """
+        # Rename the datasets to avoid problems with underscores in LaTeX
+        if scenario == "controlled":
+            df['dataset'] = df['dataset'].replace({
+                'overleaf_example': 'Overleaf Example',
+                'simple_sequence': 'Simple Sequence',
+                'long_dependency': 'Long Dependency',
+                'loop_lenght_1': 'Loop Length 1',
+                'loop_lenght_2': 'Loop Length 2',
+                'simple_and_split': 'Simple AND Split',
+                'simple_xor_split': 'Simple XOR Split'
+            })
+        
+        # Group by dataset and miner
+        grouped = df.groupby(['dataset', 'miner'])
+        table_data = []
+        previous_dataset = None
+
+        for (dataset, miner), group in grouped:
+            # Add a horizontal line between groups
+            if dataset != previous_dataset and previous_dataset is not None:
+                table_data.append(r"\hline")
+            
+            # Create a row for the current group
+            row = (
+                f"{dataset if dataset != previous_dataset else ''} & "
+                f"{miner} & "
+                f"{group['f1_score'].mean():.3f} & "
+                f"{group['log_fitness'].mean():.3f} & "
+                f"{group['precision'].mean():.3f} & "
+                f"{group['generalization'].mean():.3f} & "
+                f"{group['simplicity'].mean():.3f} \\\\"
+            )
+            table_data.append(row)
+            previous_dataset = dataset
+
+        # Add a final horizontal line
+        table_data.append(r"\hline")
+
+        # Construct the LaTeX table
+        latex_table = (
+            r"\begin{tabular}{|l|l|r|r|r|r|r|}" + "\n"
+            r"\hline" + "\n"
+            r" Dataset & Method & F1-score & Fitness & Precision & Generalization & Simplicity \\" + "\n"
+            r"\hline" + "\n"
+            + "\n".join(table_data) + "\n"
+            r"\end{tabular}"
+        )
+
+        # Save the table to a file
+        with open(output_dir + "latex_table.tex", "w") as f:
+            f.write(latex_table)
+
+        # print(latex_table)

@@ -321,7 +321,7 @@ class GraphBuilder:
         for i, t in enumerate(transitions, 0):
             for t2 in transitions[i + 1:]:
                 entry = footprint_matrix[(data['nodes'][t], data['nodes'][t2])]
-                if entry == '||' and entry == '#':
+                if entry == '||': #and entry == '#':
                     return True
         return False
     

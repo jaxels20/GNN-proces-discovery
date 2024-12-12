@@ -541,56 +541,26 @@ class PetriNet:
             1. The output transitions of place 1 and input transitions of place 2 have a direct succession
             2. The input transitions of place 1 and output transitions of place 2 have a direct succession 
         """
+        tau_id = 0
         for i, place_1 in enumerate(self.places):            
             for j, place_2 in enumerate(self.places):
-                if j > i:
-                    silent_transition_added = False
-                    
-                    # Get the input and output transitions of place_1
-                    t_out_place_1 = [arc.target for arc in self.arcs if arc.source == place_1.name]
-                    t_in_place_1 = [arc.source for arc in self.arcs if arc.target == place_1.name]
-                    
-                    # Get the input and output transitions of place_2
-                    t_in_place_2 = [arc.source for arc in self.arcs if arc.target == place_2.name]
-                    t_out_place_2 = [arc.target for arc in self.arcs if arc.source == place_2.name]
-                    
-                    for out_transition in t_out_place_1:
-                        for in_transition in t_in_place_2:
-                            if eventlog.does_eventually_follows(out_transition, in_transition):
-                                silent_transition = Transition()
-                                self.transitions.append(silent_transition)
-                                self.arcs.append(Arc(place_1.name, silent_transition.name))
-                                self.arcs.append(Arc(silent_transition.name, place_2.name))
-                                silent_transition_added = True
-                                break
-                            if eventlog.does_eventually_follows(in_transition, out_transition):
-                                silent_transition = Transition()
-                                self.transitions.append(silent_transition)
-                                self.arcs.append(Arc(place_2.name, silent_transition.name))
-                                self.arcs.append(Arc(silent_transition.name, place_1.name))
-                                silent_transition_added = True
-                                break
-                        if silent_transition_added:
-                            break
-
-                    for in_transition in t_in_place_1:
-                        for out_transition in t_out_place_2:
-                            if eventlog.does_eventually_follows(in_transition, out_transition):
-                                silent_transition = Transition()
-                                self.transitions.append(silent_transition)
-                                self.arcs.append(Arc(place_1.name, silent_transition.name))
-                                self.arcs.append(Arc(silent_transition.name, place_2.name))
-                                silent_transition_added = True
-                                break
-                            if eventlog.does_eventually_follows(out_transition, in_transition):
-                                silent_transition = Transition()
-                                self.transitions.append(silent_transition)
-                                self.arcs.append(Arc(place_2.name, silent_transition.name))
-                                self.arcs.append(Arc(silent_transition.name, place_1.name))
-                                silent_transition_added = True
-                                break
-                        if silent_transition_added:
-                            break
+                if i == j or place_1.name == "start" or place_2.name == "end" or place_1.name == "end" or place_2.name == "start":
+                    continue
+                
+                outgoing_transitions_1 = [arc.target for arc in self.arcs if arc.source == place_1.name]
+                ingoing_transitions_2 = [arc.source for arc in self.arcs if arc.target == place_2.name]
+                
+                # check if there is a direct succession between the output transitions of place 1 and the input transitions of place 2
+                for transition_1 in outgoing_transitions_1:
+                    for transition_2 in ingoing_transitions_2:
+                        if eventlog.does_eventually_follows(transition_1, transition_2, 1):
+                            tau_id += 1
+                            tau_transition = Transition(f"tau_{tau_id}")
+                            self.transitions.append(tau_transition)
+                            self.arcs.append(Arc(place_2.name, tau_transition.name))
+                            self.arcs.append(Arc(tau_transition.name, place_1.name))
+                            break        
+                   
     
     @staticmethod
     def from_graph(graph: Data):

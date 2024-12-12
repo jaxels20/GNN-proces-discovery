@@ -15,8 +15,8 @@ from pm4py.objects.petri_net.utils.reduction import apply_fsp_rule
 class CandidateAnalyzer:
     def __init__(self, input_dir: str, output_dir: str):
         self.input_dir = input_dir
-        self.output_dir = output_dir    
-
+        self.output_dir = output_dir
+        
     def evaluate_candidate_places(self, eventlog: EventLog, petrinet: PetriNet, export_nets=False, id=None):
         """
         Evaluate the candidate places in the petrinet graph.
@@ -38,7 +38,7 @@ class CandidateAnalyzer:
             pm4py_net, _, _ = petrinet.to_pm4py()
             pm4py_net, _, _ = apply_fsp_rule(pm4py_net)
             reduced_pn = PetriNet.from_pm4py(pm4py_net)
-            reduced_pn.visualize(os.path.join(self.output_dir, f"{id}_reduced_true_petrinet"))
+            #reduced_pn.visualize(os.path.join(self.output_dir, f"{id}_reduced_true_petrinet"))
             
              
         tp, fp, fn  = compare_discovered_pn_to_true_pn(candidate_pn, reduced_pn)

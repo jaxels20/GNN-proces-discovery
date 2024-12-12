@@ -228,9 +228,8 @@ class GraphBuilder:
         for source_transition, target_transitions in same_source_dict.items():
             if len(target_transitions) > 1:
                 for transition_combination in self._set_combinations(target_transitions):
-                    # check if all the target transistion have # or || relation
-                    all_parallel_or_choice = self._is_parallel_or_choice(data, self.footprint_matrix, transition_combination) 
-                    if not all_parallel_or_choice:
+                    # check if any of the target transistions have # or || relation 
+                    if self._has_parallel_or_choice(data, self.footprint_matrix, transition_combination):
                         continue
                     
                     # add candidate to petri net
@@ -242,9 +241,8 @@ class GraphBuilder:
         for target_transition, source_transitions in same_target_dict.items():
             if len(source_transitions) > 1:
                 for transition_combination in self._set_combinations(source_transitions):
-                    # check if all the target transistion have # or || relation
-                    all_parallel_or_choice = self._is_parallel_or_choice(data, self.footprint_matrix, transition_combination) 
-                    if not all_parallel_or_choice:
+                    # check if any of the target transistions have # or || relation 
+                    if self._has_parallel_or_choice(data, self.footprint_matrix, transition_combination):
                         continue
                     
                     # add candidate to petri net
@@ -301,7 +299,7 @@ class GraphBuilder:
         # Check relations and create places for valid subsets
         for sources, targets in candidate_many_to_many_places:
             for transition_combination in self._set_combinations(sources):
-                if self._is_parallel_or_choice(data, self.footprint_matrix, transition_combination):
+                if not self._has_parallel_or_choice(data, self.footprint_matrix, transition_combination):
                     # Construct and add the place node and edges
                     place_name = self._construct_place_name(data, transition_combination, targets)
                     self._add_place_node(data, place_name)
@@ -318,14 +316,14 @@ class GraphBuilder:
         return set_combinations
     
     @staticmethod
-    def _is_parallel_or_choice(data, footprint_matrix: dict, transitions: list):
-        """ Check if the relation between source and target is parallel ('||') or choice ('#') """
+    def _has_parallel_or_choice(data, footprint_matrix: dict, transitions: list):
+        """ Check if the relation between two transitions is parallel ('||') or choice ('#') """
         for i, t in enumerate(transitions, 0):
             for t2 in transitions[i + 1:]:
                 entry = footprint_matrix[(data['nodes'][t], data['nodes'][t2])]
-                if entry != '||' and entry != '#':
-                    return False
-        return True
+                if entry == '||' and entry == '#':
+                    return True
+        return False
     
     @staticmethod
     def _construct_place_name(data, sources, targets):

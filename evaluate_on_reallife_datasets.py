@@ -1,10 +1,11 @@
 from src.BatchFileLoader import BatchFileLoader
 from src.Evaluator import MultiEvaluator
 METHODS = ["Alpha", "Heuristic", "Inductive", "GNN Miner", "AAU Miner"]
+CPU_COUNT = 4
 
 if __name__ == "__main__":
     dataset_dir = "./real_life_datasets"
-    loader = BatchFileLoader(cpu_count=4)
+    loader = BatchFileLoader(cpu_count=CPU_COUNT)
     all_eventlogs = loader.load_all_eventlogs(dataset_dir)
 
     # appned "./results" to the keys of the dictionary

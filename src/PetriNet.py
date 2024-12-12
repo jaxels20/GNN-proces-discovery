@@ -19,6 +19,11 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, parent_dir)
 import figure_generation.constants as constants
 
+def _tau_name_generator():
+    counter = 1
+    while True:
+        yield f"tau_{counter}"
+        counter += 1
 
 class Place:
     """
@@ -50,7 +55,7 @@ class Place:
 
     def __repr__(self):
         return f"Place({self.name}, tokens={self.tokens})"
-
+       
 class Transition:
     """
     Class representing a transition in a Petri net.
@@ -60,8 +65,12 @@ class Transition:
     name : str
         The name of the transition.
     """
-
-    def __init__(self, name: str):
+    _tau_generator = _tau_name_generator()
+    
+    def __init__(self, name: str = None):
+        if name is None:
+            # Fetch the next generated name. Should only be used for tau transitions.
+            name = next(self._tau_generator)
         self.name = name
 
     def __repr__(self):
@@ -97,7 +106,6 @@ class Arc:
 
     def __repr__(self):
         return f"Arc({self.source} -> {self.target}, weight={self.weight})"
-
 
 class PetriNet:
     """
@@ -527,7 +535,63 @@ class PetriNet:
         self.places = []
         self.transitions = []
         self.arcs = []
-      
+    
+    def add_silent_transitions(self, eventlog: EventLog) -> None:
+        """ Add silent transitions to the Petri net graph between places. A silent transitions either if:
+            1. The output transitions of place 1 and input transitions of place 2 have a direct succession
+            2. The input transitions of place 1 and output transitions of place 2 have a direct succession 
+        """
+        for i, place_1 in enumerate(self.places):            
+            for j, place_2 in enumerate(self.places):
+                if j > i:
+                    silent_transition_added = False
+                    
+                    # Get the input and output transitions of place_1
+                    t_out_place_1 = [arc.target for arc in self.arcs if arc.source == place_1.name]
+                    t_in_place_1 = [arc.source for arc in self.arcs if arc.target == place_1.name]
+                    
+                    # Get the input and output transitions of place_2
+                    t_in_place_2 = [arc.source for arc in self.arcs if arc.target == place_2.name]
+                    t_out_place_2 = [arc.target for arc in self.arcs if arc.source == place_2.name]
+                    
+                    for out_transition in t_out_place_1:
+                        for in_transition in t_in_place_2:
+                            if eventlog.does_eventually_follows(out_transition, in_transition):
+                                silent_transition = Transition()
+                                self.transitions.append(silent_transition)
+                                self.arcs.append(Arc(place_1.name, silent_transition.name))
+                                self.arcs.append(Arc(silent_transition.name, place_2.name))
+                                silent_transition_added = True
+                                break
+                            if eventlog.does_eventually_follows(in_transition, out_transition):
+                                silent_transition = Transition()
+                                self.transitions.append(silent_transition)
+                                self.arcs.append(Arc(place_2.name, silent_transition.name))
+                                self.arcs.append(Arc(silent_transition.name, place_1.name))
+                                silent_transition_added = True
+                                break
+                        if silent_transition_added:
+                            break
+
+                    for in_transition in t_in_place_1:
+                        for out_transition in t_out_place_2:
+                            if eventlog.does_eventually_follows(in_transition, out_transition):
+                                silent_transition = Transition()
+                                self.transitions.append(silent_transition)
+                                self.arcs.append(Arc(place_1.name, silent_transition.name))
+                                self.arcs.append(Arc(silent_transition.name, place_2.name))
+                                silent_transition_added = True
+                                break
+                            if eventlog.does_eventually_follows(out_transition, in_transition):
+                                silent_transition = Transition()
+                                self.transitions.append(silent_transition)
+                                self.arcs.append(Arc(place_2.name, silent_transition.name))
+                                self.arcs.append(Arc(silent_transition.name, place_1.name))
+                                silent_transition_added = True
+                                break
+                        if silent_transition_added:
+                            break
+    
     @staticmethod
     def from_graph(graph: Data):
         """

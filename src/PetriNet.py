@@ -556,7 +556,6 @@ class PetriNet:
                     
                     for out_transition in t_out_place_1:
                         for in_transition in t_in_place_2:
-                            # Check for direct succession between the output transition of place_1 and input transition of place_2. Indication of loop.
                             if eventlog.does_eventually_follows(out_transition, in_transition):
                                 silent_transition = Transition()
                                 self.transitions.append(silent_transition)
@@ -564,7 +563,6 @@ class PetriNet:
                                 self.arcs.append(Arc(silent_transition.name, place_2.name))
                                 silent_transition_added = True
                                 break
-                            # Check for direct succesion between the input transition of place_2 and output transition of place_1. Indication of loop.
                             if eventlog.does_eventually_follows(in_transition, out_transition):
                                 silent_transition = Transition()
                                 self.transitions.append(silent_transition)

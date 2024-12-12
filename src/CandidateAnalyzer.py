@@ -30,7 +30,7 @@ class CandidateAnalyzer:
             return None, None, None
         graph = self._select_all_places(graph)
         candidate_pn = PetriNet.from_graph(graph)   
-        
+        candidate_pn.add_silent_transitions(eventlog)
         if export_nets and id is not None:
             petrinet.visualize(os.path.join(self.output_dir, f"{id}_true_petrinet"))
             candidate_pn.visualize(os.path.join(self.output_dir, f"{id}_candidate_petrinet"))

@@ -4,8 +4,7 @@ from src.Evaluator import MultiEvaluator
 import os
 INPUT_DIR = "./controlled_scenarios/" # Assume structered like this "./controlled_scenarios/dataset_name/"
 OUTPUT_DIR = "./controlled_scenarios_results/" 
-METHODS = ["alpha", "heuristic", "inductive", "gnn_miner", "aau_miner"]
-METHODS = ["alpha", "heuristic"]
+METHODS = ["Alpha", "Heuristic", "Inductive", "GNN Miner", "AAU Miner"]
 NUM_WORKERS = 4
 
 if __name__ == "__main__":

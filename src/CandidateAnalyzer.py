@@ -29,7 +29,7 @@ class CandidateAnalyzer:
         if graph is None:
             return None, None, None
         graph = self._select_all_places(graph)
-        candidate_pn = PetriNet.from_graph(graph)   
+        candidate_pn = PetriNet.from_graph(graph)           
         
         if export_nets and id is not None:
             petrinet.visualize(os.path.join(self.output_dir, f"{id}_true_petrinet"))
@@ -38,7 +38,7 @@ class CandidateAnalyzer:
             pm4py_net, _, _ = petrinet.to_pm4py()
             pm4py_net, _, _ = apply_fsp_rule(pm4py_net)
             reduced_pn = PetriNet.from_pm4py(pm4py_net)
-            #reduced_pn.visualize(os.path.join(self.output_dir, f"{id}_reduced_true_petrinet"))
+            reduced_pn.visualize(os.path.join(self.output_dir, f"{id}_reduced_true_petrinet"))
             
              
         tp, fp, fn  = compare_discovered_pn_to_true_pn(candidate_pn, reduced_pn)
@@ -143,6 +143,12 @@ class CandidateAnalyzer:
         
         df.to_csv(os.path.join(self.output_dir, "results.csv"), index=False)
         print(f"Results saved to {os.path.join(self.output_dir, 'results.csv')}")
+        
+        self.save_df_to_pdf(df, os.path.join(self.output_dir, "results.pdf"))
+        print(f"Results saved to {os.path.join(self.output_dir, 'results.pdf')}")
+        
+        self.save_df_to_latex(df, os.path.join(self.output_dir, "results.tex"))
+        print(f"Results saved to {os.path.join(self.output_dir, 'results.tex')}")
         
         # Mean precision and recall for all scenarios
         mean_precision = df["Precision"].mean()

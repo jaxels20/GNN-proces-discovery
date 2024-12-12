@@ -19,6 +19,7 @@ def compare_discovered_pn_to_true_pn(candidate_pn: PetriNet, true_pn: PetriNet):
         for true_place in true_places:
             true_ingoing_transitions = sorted(true_pn.get_ingoing_transitions(true_place.name))
             true_outgoing_transitions = sorted(true_pn.get_outgoing_transitions(true_place.name))
+            # Replace tau transition names with just tau.
             if candidate_ingoing_transitions == true_ingoing_transitions and candidate_outgoing_transitions == true_outgoing_transitions:
                 true_positives += 1
                 found_true_positive = True

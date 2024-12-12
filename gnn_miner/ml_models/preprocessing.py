@@ -235,6 +235,7 @@ class GraphBuilder:
       sameInputs[p[0]][p[1]].update(traceIds)
       sameOutputs[p[1]][p[0]].update(traceIds)
 
+    # Add one to many places
     for inputTransitions, outputTransitionGroups in sameInputs.items():
       outputTransitionGroups = [(key, value) for key, value in outputTransitionGroups.items()]
       if len(outputTransitionGroups) > 1:
@@ -255,6 +256,8 @@ class GraphBuilder:
               break
       if len(self.mPossiblePlaces) > maximum_number_of_places:
         break
+      
+    # Add many to one places
     for outputTransitions, inputTransitionGroups in sameOutputs.items():
       inputTransitionGroups = [(key, value) for key, value in inputTransitionGroups.items()]
       if len(inputTransitionGroups) > 1:

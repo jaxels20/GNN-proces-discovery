@@ -70,11 +70,23 @@ class LogHandler:
 
     if len(self.mVariants) == 0:
       variants = case_statistics.get_variant_statistics(self.mLog)
+      # for variant in variants:
+      #   print(partialTransitionList)
+      #   print(variant['variant'])
+      #   print(",".join(variant['variant']).replace(",", ""))
+      #   break
       variants = [{
         'count': int(variant['count']),
-        'variant': self.__compress(fullTransitionList,
-                                   self.__filterTrace(partialTransitionList, ",".join(variant['variant']).replace(",", ""),
-                                                      fRegex=fRegex, fFrequent=fFrequent))
+        'variant': self.__compress(
+                        fullTransitionList,
+                        self.__filterTrace(
+                                    partialTransitionList, 
+                                    variant['variant'],
+                                    # ",".join(variant['variant']).replace(",", ""),
+                                    fRegex=fRegex, 
+                                    fFrequent=fFrequent
+                        )
+        )
       } for variant in variants]
       if fRegex != '' or fFrequent != 100:
         variantsMerged = defaultdict(int)

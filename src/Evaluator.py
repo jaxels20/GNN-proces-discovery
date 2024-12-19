@@ -10,8 +10,6 @@ from src.Discovery import Discovery
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from concurrent.futures import ProcessPoolExecutor
-import copy
-import tabulate
 
 
 # This class can evaluate a discovered process model against an event log (only one!)

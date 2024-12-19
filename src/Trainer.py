@@ -162,8 +162,8 @@ class Trainer:
         self.save_model()
 
         # # save the training stats as a csv file
-        # training_stats_df = pd.DataFrame(training_stats)
-        # training_stats_df.to_csv("training_stats.csv", index=False)
+        training_stats_df = pd.DataFrame(training_stats)
+        training_stats_df.to_csv("training_stats.csv", index=False)
 
         # create a training figure
         fig, ax = TrainingFigureGenerator.create_training_figure(training_stats)

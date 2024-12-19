@@ -1,25 +1,25 @@
 from src.BatchFileLoader import BatchFileLoader
 from src.Evaluator import MultiEvaluator
+METHODS = ["Alpha", "Heuristic", "Inductive", "GNN Miner", "AAU Miner"]
+CPU_COUNT = 4
 
 if __name__ == "__main__":
     dataset_dir = "./real_life_datasets"
-    loader = BatchFileLoader(cpu_count=4)
+    loader = BatchFileLoader(cpu_count=CPU_COUNT)
     all_eventlogs = loader.load_all_eventlogs(dataset_dir)
 
     # appned "./results" to the keys of the dictionary
     #all_eventlogs = {f"./real_life_results/{k}": v for k, v in all_eventlogs.items()}
     
     # Create and evaluate the MultiEvaluator
-    multi_evaluator = MultiEvaluator(all_eventlogs, ["alpha", "heuristic", "inductive", "gnn"])
-    
+    multi_evaluator = MultiEvaluator(all_eventlogs, METHODS)
     
     results_df = multi_evaluator.evaluate_all(num_cores=4)
     
     results_df.to_csv("./real_life_results/results.csv")
     
-    multi_evaluator.save_dataframe_to_pdf(results_df, "./real_life_results/results.pdf")
+    multi_evaluator.save_df_to_pdf(results_df, "./real_life_results/results.pdf")
+    
+    multi_evaluator.save_df_to_latex(results_df, "./real_life_results", scenario="real_life")
     
     multi_evaluator.export_petri_nets("./real_life_results")
-    
-    
-

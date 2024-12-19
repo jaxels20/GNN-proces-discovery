@@ -17,7 +17,7 @@ from pm4py.algo.discovery.inductive.algorithm import apply as pm4py_inductive_mi
 from pm4py.objects.conversion.process_tree import converter as pt_converter
 BEAM_WIDTH = 3
 BEAM_LENGTH = 2
-TOP_X_TRACES = 1000
+TOP_X_TRACES = 100
 
 class Discovery:
     @staticmethod
@@ -55,7 +55,7 @@ class Discovery:
         return net
 
     @staticmethod
-    def AAU_miner(event_log: EventLog, model_path: str = "./models/graph_sage_model_with_dense_classifier.pth", eventually_follows_length: int = 1) -> PetriNet:
+    def AAU_miner(event_log: EventLog, model_path: str = "./models/experiment_1_model.pth", eventually_follows_length: int = 1) -> PetriNet:
         # Load the model
         model = GNNWithClassifier(input_dim=64, hidden_dim=16, output_dim=1, dense_hidden_dim=32)
         model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
@@ -107,11 +107,11 @@ class Discovery:
 
     # Map method names to static methods
     methods = {
-        "alpha": alpha_miner,
-        "heuristic": heuristic_miner,
-        "inductive": inductive_miner,
-        "aau_miner": AAU_miner,
-        "gnn_miner": GNN_miner
+        "Alpha": alpha_miner,
+        "Heuristic": heuristic_miner,
+        "Inductive": inductive_miner,
+        "AAU Miner": AAU_miner,
+        "GNN Miner": GNN_miner
     }
 
     @classmethod

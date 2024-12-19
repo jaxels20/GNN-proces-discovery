@@ -1,18 +1,18 @@
 {
     "tree_generation": {
-        "sequence": 0.2,
-        "choice": 0.2,
-        "parallel": 0.2,
+        "sequence": 0.4,
+        "choice": 0.3,
+        "parallel": 0.3,
         "loop": 0.0,
         "or": 0.0,
-        "mode": 4,
-        "min": 2,
+        "mode": 6,
+        "min": 4,
         "max": 8,
         "silent": 0,
         "duplicate": 0,
-        "no_models": 100
+        "no_models": 5000
     },
     "log_generation": {
-        "num_traces": 40
+        "num_traces": 300
     }
 }

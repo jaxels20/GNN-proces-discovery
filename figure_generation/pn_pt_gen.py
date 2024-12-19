@@ -22,14 +22,14 @@ def process_tree_fig():
     activity_d = ProcessTree(label="d")  # Activity node labeled "D"
 
 
-    # Step 2: Create the root node with SEQUENCE operator
-    root_node = ProcessTree(operator=Operator.SEQUENCE)
+    # Step 2: Create the root node with SEQUENCE operator (➡️ symbol)
+    root_node = ProcessTree(operator=Operator.SEQUENCE, label="→")
 
-    # Step 3: Create additional nodes with operators and assign relationships
-    # XOR operator node to decide between B and the parallel section
-    xor_node = ProcessTree(operator=Operator.XOR)
-    parallel_node = ProcessTree(operator=Operator.PARALLEL)
-    loop_node = ProcessTree(operator=Operator.LOOP)
+    # Step 3: Create additional nodes with operator symbols
+    xor_node = ProcessTree(operator=Operator.XOR, label="⊕")  # XOR operator symbol
+    parallel_node = ProcessTree(operator=Operator.PARALLEL, label="∥")  # Parallel operator symbol
+    loop_node = ProcessTree(operator=Operator.LOOP, label="⟳")  # Loop operator symbol
+
 
     # Step 4: Build the tree structure by appending children to appropriate parents
     root_node.children = [activity_a, xor_node]  # SEQUENCE of A followed by XOR
@@ -49,6 +49,21 @@ def process_tree_fig():
 
     # Step 5: Visualize the process tree as a PDF
     gviz = pt_visualizer(root_node)
+    
+    # Step 7: Explicitly set labels for operator nodes in the Graphviz object
+    for node_id in gviz.node_attr.keys():
+        if node_id.startswith("operator:"):
+            operator_type = gviz.node_attr[node_id].get('label', '').strip('"')
+            # Map operator labels to custom symbols
+            symbol_map = {
+                "sequence": "→",
+                "xor": "⊕",
+                "and": "∥",
+                "loop": "⟳",
+            }
+            if operator_type.lower() in symbol_map:
+                gviz.node_attr[node_id]['label'] = f'"{symbol_map[operator_type.lower()]}"'
+
     
     # set the rankdir to be from left to right
     gviz.attr(

@@ -6,9 +6,10 @@ from pm4py.objects.petri_net.utils.check_soundness import (
     check_easy_soundness_net_in_fin_marking,
 )
 from pm4py.objects.process_tree.importer.variants.ptml import apply as import_ptml_tree
+from pm4py.objects.petri_net.importer.variants.pnml import import_net as import_pnml_net
 from pm4py.objects.conversion.process_tree.variants.to_petri_net import apply as convert_pt_to_pn
 from src.EventLog import EventLog
-from pm4py.write import write_ptml
+import pm4py.write as pm4py_write
 from pm4py.convert import convert_to_process_tree as convert_to_pt
 from torch_geometric.data import Data
 from copy import deepcopy
@@ -18,12 +19,6 @@ import sys
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, parent_dir)
 import figure_generation.constants as constants
-
-def _tau_name_generator():
-    counter = 1
-    while True:
-        yield f"tau_{counter}"
-        counter += 1
 
 class Place:
     """
@@ -65,12 +60,8 @@ class Transition:
     name : str
         The name of the transition.
     """
-    _tau_generator = _tau_name_generator()
     
     def __init__(self, name: str = None):
-        if name is None:
-            # Fetch the next generated name. Should only be used for tau transitions.
-            name = next(self._tau_generator)
         self.name = name
 
     def __repr__(self):
@@ -422,6 +413,12 @@ class PetriNet:
         pt = import_ptml_tree(ptml_file)
         pm4py_pn, _, _ = convert_pt_to_pn(pt)
         return deepcopy(PetriNet.from_pm4py(pm4py_pn))
+    
+    @staticmethod
+    def from_pnml(ptml_file: str):
+        """Create a Petri net from a PTML file."""
+        pn, init_marking, end_marking = import_pnml_net(ptml_file)
+        return deepcopy(PetriNet.from_pm4py(pn))
 
     def soundness_check(self) -> bool:
         """Check if the Petri net is sound, i.e. safeness, proper completion, option to complete and absence of dead parts"""
@@ -527,7 +524,13 @@ class PetriNet:
         """Convert the Petri net to a PTML file."""
         pm4py_pn, init, end = self.to_pm4py()
         pt = convert_to_pt(pm4py_pn, init, end)
-        write_ptml(pt, filename)
+        pm4py_write.write_ptml(pt, filename)
+        print(f"Petri net saved as {filename}")
+        
+    def to_pnml(self, filename: str):
+        """Convert the Petri net to a PNML file."""
+        pm4py_pn, init, end = self.to_pm4py()
+        pm4py_write.write_pnml(pm4py_pn, init, end, filename)
         print(f"Petri net saved as {filename}")
     
     def empty(self):
@@ -560,8 +563,7 @@ class PetriNet:
                             self.arcs.append(Arc(place_2.name, tau_transition.name))
                             self.arcs.append(Arc(tau_transition.name, place_1.name))
                             break        
-                   
-    
+                              
     @staticmethod
     def from_graph(graph: Data):
         """

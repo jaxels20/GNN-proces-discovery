@@ -24,11 +24,23 @@ class BatchFileLoader:
         """
         Helper function to load a single PetriNet object from a file.
         Extracts the ID and returns a tuple of (id, PetriNet object).
+        Supports both .ptml and .pnml files.
         """
-        if not file_path.endswith(".ptml"):
-            return None  # Skip non-PTML files
-        pn = PetriNet.from_ptml(file_path)
-        file_id = os.path.basename(file_path).split("_")[1].removesuffix(".ptml")
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext not in [".ptml", ".pnml"]:
+            return None  # Skip unsupported files
+
+        # Determine how to load the PetriNet based on extension
+        if ext == ".ptml":
+            pn = PetriNet.from_ptml(file_path)
+        else:  # ext == ".pnml"
+            pn = PetriNet.from_pnml(file_path)
+
+        filename = os.path.basename(file_path)
+        name_without_ext = os.path.splitext(filename)[0]
+        parts = name_without_ext.split("_")
+        file_id = parts[1] if len(parts) > 1 else name_without_ext
+
         return file_id, pn
 
     @staticmethod
@@ -41,12 +53,16 @@ class BatchFileLoader:
             return None  # Skip non-XES files
         try:
             el = EventLog.load_xes(file_path)
-            file_id = os.path.basename(file_path).split("_")[1].removesuffix(".xes")
-            # if int(file_id) > 1000:
-            #     raise ValueError("Invalid ID")
+            filename = os.path.basename(file_path)
+            name_without_ext = os.path.splitext(filename)[0]
+            parts = name_without_ext.split("_")
+            file_id = parts[1] if len(parts) > 1 else name_without_ext
         except:
-            file_id = os.path.basename(file_path).removesuffix(".xes")
+            filename = os.path.basename(file_path)
+            name_without_ext = os.path.splitext(filename)[0]
             el = EventLog.load_xes(file_path)
+            file_id = name_without_ext
+
         return file_id, el
 
     def load_all_petrinets(self, input_dir: str):
@@ -54,7 +70,8 @@ class BatchFileLoader:
         Load all PetriNet objects from a directory using multiprocessing.
         Returns a dictionary where keys are IDs and values are PetriNet objects.
         """
-        all_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.endswith(".ptml")]
+        all_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) 
+                     if f.lower().endswith(".ptml") or f.lower().endswith(".pnml")]
         with Pool(processes=self.cpu_count) as pool:
             results = pool.map(self._load_petrinet, all_files)
         return {file_id: pn for file_id, pn in results if file_id is not None}
@@ -63,7 +80,8 @@ class BatchFileLoader:
         """
         Generator function to yield batches of PetriNet objects from a directory.
         """
-        all_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.endswith(".ptml")]
+        all_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) 
+                     if f.lower().endswith(".ptml") or f.lower().endswith(".pnml")]
         all_files.sort()
         for i in range(0, len(all_files), batch_size):
             batch_files = all_files[i:i + batch_size]
@@ -76,7 +94,7 @@ class BatchFileLoader:
         Load all EventLog objects from a directory using multiprocessing.
         Returns a dictionary where keys are IDs and values are EventLog objects.
         """
-        all_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.endswith(".xes")]
+        all_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.lower().endswith(".xes")]
         with Pool(processes=self.cpu_count) as pool:
             results = pool.map(self._load_eventlog, all_files)
         
@@ -86,7 +104,7 @@ class BatchFileLoader:
         """
         Generator function to yield batches of EventLog objects from a directory.
         """
-        all_files = [os.path.join(input_dir, file) for file in os.listdir(input_dir) if file.endswith(".xes")]
+        all_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.lower().endswith(".xes")]
         all_files.sort()
         for i in range(0, len(all_files), batch_size):
             batch_files = all_files[i:i + batch_size]

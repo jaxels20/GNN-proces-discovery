@@ -1,0 +1,35 @@
+,simplicity,generalization,perc_fit_traces,average_trace_fitness,log_fitness,percentage_of_fitting_traces,precision,f1_score,miner,dataset
+0,1.0,0.098,100.0,1.0,1.0,100.0,1.0,1.0,Alpha,simple_xor_split
+1,1.0,0.507,33.333,0.822,0.8,33.333,0.571,0.667,Alpha,loop_lenght_2
+2,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,Alpha,simple_sequence
+3,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,Alpha,simple_and_split
+4,0.818,0.334,100.0,1.0,1.0,100.0,0.8,0.889,Alpha,long_dependency
+5,1.0,0.504,100.0,1.0,1.0,100.0,0.606,0.755,Alpha,loop_lenght_1
+6,1.0,0.304,33.333,0.867,0.846,33.333,0.696,0.764,Alpha,overleaf_example
+7,1.0,0.098,100.0,1.0,1.0,100.0,1.0,1.0,Heuristic,simple_xor_split
+8,1.0,0.49,100.0,1.0,1.0,100.0,0.958,0.979,Heuristic,loop_lenght_2
+9,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,Heuristic,simple_sequence
+10,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,Heuristic,simple_and_split
+11,0.818,0.334,100.0,1.0,1.0,100.0,0.8,0.889,Heuristic,long_dependency
+12,1.0,0.526,100.0,1.0,1.0,100.0,0.833,0.909,Heuristic,loop_lenght_1
+13,0.765,0.257,33.333,0.958,0.947,33.333,0.889,0.917,Heuristic,overleaf_example
+14,1.0,0.098,100.0,1.0,1.0,100.0,1.0,1.0,Inductive,simple_xor_split
+15,1.0,0.49,100.0,1.0,1.0,100.0,0.958,0.979,Inductive,loop_lenght_2
+16,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,Inductive,simple_sequence
+17,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,Inductive,simple_and_split
+18,0.818,0.334,100.0,1.0,1.0,100.0,0.8,0.889,Inductive,long_dependency
+19,1.0,0.526,100.0,1.0,1.0,100.0,0.833,0.909,Inductive,loop_lenght_1
+20,0.8,0.315,100.0,1.0,1.0,100.0,0.889,0.941,Inductive,overleaf_example
+21,0.846,0.117,50.0,0.875,0.9,50.0,1.0,0.947,GNN Miner,simple_xor_split
+22,1.0,0.471,100.0,1.0,1.0,100.0,0.958,0.979,GNN Miner,loop_lenght_2
+23,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,GNN Miner,simple_and_split
+24,0.714,0.352,50.0,0.867,0.89,50.0,0.8,0.843,GNN Miner,long_dependency
+25,1.0,0.492,100.0,1.0,1.0,100.0,0.833,0.909,GNN Miner,loop_lenght_1
+26,0.882,0.273,0.0,0.597,0.594,0.0,0.765,0.668,GNN Miner,overleaf_example
+27,0.714,0.098,0.0,0.667,0.667,0.0,0.333,0.444,AAU Miner,simple_xor_split
+28,0.6,0.507,0.0,0.303,0.286,0.0,0.25,0.267,AAU Miner,loop_lenght_2
+29,0.714,0.293,0.0,0.5,0.5,0.0,0.333,0.4,AAU Miner,simple_sequence
+30,0.6,0.293,0.0,0.4,0.4,0.0,0.25,0.308,AAU Miner,simple_and_split
+31,0.538,0.334,0.0,0.5,0.5,0.0,0.4,0.444,AAU Miner,long_dependency
+32,0.714,0.504,0.0,0.34,0.333,0.0,0.333,0.333,AAU Miner,loop_lenght_1
+33,0.6,0.304,0.0,0.489,0.462,0.0,0.25,0.324,AAU Miner,overleaf_example

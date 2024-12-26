@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <ptml>
-  <processTree name="e762f7e4-5d67-4794-8e73-4a8bd6bbd2cb" root="88eed698-a3de-4c19-8973-1da24a17e3a9" id="e30e00e2-d267-4cb4-807c-9111428eac40">
-    <sequence name="" id="88eed698-a3de-4c19-8973-1da24a17e3a9"/>
-    <manualTask name="A" id="ee162368-a598-4bc7-a537-0074e6beddf1"/>
-    <xor name="" id="6ae81b00-8eed-4236-bea0-7b65267fccec"/>
-    <manualTask name="C" id="e318c14f-b8af-4345-bfce-d750fbcdb6d2"/>
-    <manualTask name="B" id="8f59bce8-795b-4197-bf10-1271d6db5cad"/>
-    <parentsNode id="05c7b113-252f-4b9f-a379-6af88a16932a" sourceId="88eed698-a3de-4c19-8973-1da24a17e3a9" targetId="ee162368-a598-4bc7-a537-0074e6beddf1"/>
-    <parentsNode id="841984e8-01c7-47bd-b8c8-b3d03a71a5fa" sourceId="88eed698-a3de-4c19-8973-1da24a17e3a9" targetId="6ae81b00-8eed-4236-bea0-7b65267fccec"/>
-    <parentsNode id="38bc2782-c29d-4c9e-a683-5a79b2c4fdaa" sourceId="6ae81b00-8eed-4236-bea0-7b65267fccec" targetId="e318c14f-b8af-4345-bfce-d750fbcdb6d2"/>
-    <parentsNode id="30f5a807-2c05-491a-945c-4ab207c49de4" sourceId="6ae81b00-8eed-4236-bea0-7b65267fccec" targetId="8f59bce8-795b-4197-bf10-1271d6db5cad"/>
+  <processTree name="19ba79c2-f1bd-421f-b972-2f3f314230b7" root="5d2edcb6-ed05-4910-9271-ed78a6d6a084" id="87322944-40ae-4a5c-9616-b1f3b8469f27">
+    <sequence name="" id="5d2edcb6-ed05-4910-9271-ed78a6d6a084"/>
+    <manualTask name="A" id="7141163b-cd84-4b59-bdbb-4dac98401d93"/>
+    <xor name="" id="699682b1-7ccb-4b91-ab43-e8396c4f1ee4"/>
+    <manualTask name="C" id="8602670a-ffa3-4491-9eb8-c54680bd114a"/>
+    <manualTask name="B" id="6a73a9eb-7dae-46be-a23d-3da093677d80"/>
+    <parentsNode id="fda19f71-c6a8-40c0-8645-eabf8e063de5" sourceId="5d2edcb6-ed05-4910-9271-ed78a6d6a084" targetId="7141163b-cd84-4b59-bdbb-4dac98401d93"/>
+    <parentsNode id="e9f49503-3ff7-4792-bd16-dceb59179bba" sourceId="5d2edcb6-ed05-4910-9271-ed78a6d6a084" targetId="699682b1-7ccb-4b91-ab43-e8396c4f1ee4"/>
+    <parentsNode id="c66f71de-67a8-4389-acd1-c07c440c3af0" sourceId="699682b1-7ccb-4b91-ab43-e8396c4f1ee4" targetId="8602670a-ffa3-4491-9eb8-c54680bd114a"/>
+    <parentsNode id="f887c449-c3b7-47bf-b779-e67fd55f6db8" sourceId="699682b1-7ccb-4b91-ab43-e8396c4f1ee4" targetId="6a73a9eb-7dae-46be-a23d-3da093677d80"/>
   </processTree>
 </ptml>

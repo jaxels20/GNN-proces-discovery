@@ -17,7 +17,7 @@ class CandidateAnalyzer:
         self.input_dir = input_dir
         self.output_dir = output_dir
         
-    def evaluate_candidate_places(self, eventlog: EventLog, petrinet: PetriNet, export_nets=False, id=None):
+    def evaluate_candidate_places(self, eventlog: EventLog, true_petrinet: PetriNet, add_silent_transitions: bool = False, export_nets=False, id=None):
         """
         Evaluate the candidate places in the petrinet graph.
         If export_nets is True, export the petrinet graphs to the output directory with the given id.
@@ -29,22 +29,22 @@ class CandidateAnalyzer:
         if graph is None:
             return None, None, None
         graph = self._select_all_places(graph)
-        candidate_pn = PetriNet.from_graph(graph)   
-        # candidate_pn.add_silent_transitions(eventlog)
-        if export_nets and id is not None:
-            petrinet.visualize(os.path.join(self.output_dir, f"{id}_true_petrinet"))
-            candidate_pn.visualize(os.path.join(self.output_dir, f"{id}_candidate_petrinet"))
-            
-            pm4py_net, _, _ = petrinet.to_pm4py()
-            pm4py_net, _, _ = apply_fsp_rule(pm4py_net)
-            reduced_pn = PetriNet.from_pm4py(pm4py_net)
-            reduced_pn.visualize(os.path.join(self.output_dir, f"{id}_reduced_true_petrinet"))
-            
-             
-        tp, fp, fn  = compare_discovered_pn_to_true_pn(candidate_pn, reduced_pn)
+        candidate_pn = PetriNet.from_graph(graph)
+        if add_silent_transitions:
+            candidate_pn.add_silent_transitions(eventlog)
+        # candidate_pn_pm4py, _, _ = candidate_pn.to_pm4py()
+        # candidate_pn_pm4py, _, _ = apply_fsp_rule(candidate_pn_pm4py)
+        # candidate_pn_reduced = PetriNet.from_pm4py(candidate_pn_pm4py)
         
-
-            
+        if export_nets and id is not None:
+            true_petrinet.visualize(os.path.join(self.output_dir, f"{id}_true_petrinet"))
+            # true_petrinet, _, _ = true_petrinet.to_pm4py()
+            # true_petrinet, _, _ = apply_fsp_rule(pm4py_net)
+            # true_petrinet_reduced = PetriNet.from_pm4py(pm4py_net)
+            # true_petrinet_reduced.visualize(os.path.join(self.output_dir, f"{id}_reduced_true_petrinet"))    
+            candidate_pn.visualize(os.path.join(self.output_dir, f"{id}_candidate_petrinet"))
+             
+        tp, fp, fn = compare_discovered_pn_to_true_pn(candidate_pn, true_petrinet)
         return tp, fp, fn
     
     def _select_all_places(self, graph: Data) -> Data:
@@ -54,11 +54,11 @@ class CandidateAnalyzer:
         graph["selected_nodes"] = torch.ones(graph.num_nodes, dtype=torch.bool)
         return graph
     
-    def evaluate_on_controlled_scenarios(self):
+    def evaluate_on_controlled_scenarios(self, add_silent_transitions: bool = False):
         # Make sure the output directory exists
         os.makedirs(self.output_dir, exist_ok=True)
         
-        dataset_dirs = os.listdir(self.input_dir)
+
         # Filter out files, keep only directories
         dataset_dirs = [x for x in dataset_dirs if not os.path.isfile(os.path.join(self.input_dir, x))]
         

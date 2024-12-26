@@ -1,0 +1,12 @@
+,simplicity,generalization,perc_fit_traces,average_trace_fitness,log_fitness,percentage_of_fitting_traces,precision,f1_score,miner,dataset
+0,0.189,0.827,0.0,0.606,0.624,0.0,0.0,0.0,AAU Miner,payment
+1,0.628,0.986,0.0,0.518,0.522,0.0,0.829,0.641,AAU Miner,traffic
+2,0.236,0.985,0.0,0.561,0.527,0.0,1.0,0.69,AAU Miner,BPI-2012-A
+3,0.248,0.982,0.0,0.543,0.582,0.0,1.0,0.736,AAU Miner,2012
+4,0.269,0.991,0.0,0.452,0.46,0.0,0.0,0.0,AAU Miner,BPI-2017-O
+5,0.156,0.949,0.0,0.351,0.36,0.0,0.0,0.0,AAU Miner,BPI-2020-Prepaid-travel-cost
+6,0.262,0.983,0.0,0.345,0.369,0.0,0.0,0.0,AAU Miner,BPI-2020-Permit-log
+7,0.214,0.913,0.0,0.292,0.317,0.0,0.6,0.415,AAU Miner,sepsis
+8,0.27,0.993,0.0,0.578,0.55,0.0,0.667,0.603,AAU Miner,BPI-2017-A
+9,0.243,0.978,0.0,0.499,0.495,0.0,0.0,0.0,AAU Miner,BPI-2020-International-declarations
+10,0.207,0.785,0.0,0.575,0.583,0.0,0.25,0.35,AAU Miner,BPI-2020-Domestic-declarations

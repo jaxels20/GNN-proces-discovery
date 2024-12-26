@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # remove all files from the list
     dataset_dirs = [x for x in dataset_dirs if not os.path.isfile(f"{INPUT_DIR}{x}")]
     eventlogs = {} # name: eventlog
-    loader = BatchFileLoader(cpu_count=1)
+    loader = BatchFileLoader(cpu_count=NUM_WORKERS)
     for dataset_dir in dataset_dirs:
         temp_eventlogs = loader.load_all_eventlogs(f"{INPUT_DIR}{dataset_dir}")
         # check that there is only one event log in the directory

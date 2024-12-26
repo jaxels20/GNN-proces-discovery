@@ -1,0 +1,8 @@
+,simplicity,generalization,perc_fit_traces,average_trace_fitness,log_fitness,percentage_of_fitting_traces,precision,f1_score,miner,dataset
+0,0.667,0.098,0.0,0.9,0.9,0.0,1.0,0.947,AAU Miner,simple_xor_split
+1,0.818,0.49,0.0,0.759,0.75,0.0,0.667,0.706,AAU Miner,loop_lenght_2
+2,1.0,0.293,100.0,1.0,1.0,100.0,1.0,1.0,AAU Miner,simple_sequence
+3,0.75,0.195,100.0,1.0,1.0,100.0,0.714,0.833,AAU Miner,simple_and_split
+4,0.565,0.334,0.0,0.857,0.857,0.0,1.0,0.923,AAU Miner,long_dependency
+5,1.0,0.526,100.0,1.0,1.0,100.0,0.833,0.909,AAU Miner,loop_lenght_1
+6,0.524,0.304,0.0,0.758,0.745,0.0,0.929,0.827,AAU Miner,overleaf_example

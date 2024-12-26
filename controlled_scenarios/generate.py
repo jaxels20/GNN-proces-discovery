@@ -207,7 +207,6 @@ def loop_lenght_2(output_dir: str) -> None:
     petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
 
 
-
 # TEST CASE 6: A long term dependency
 def long_dependency(output_dir: str) -> None:
     # Write Petrinet and XES file
@@ -256,11 +255,9 @@ def long_dependency(output_dir: str) -> None:
     petri_net.add_arc("E", "End")
 
     petri_net.visualize(f"{output_dir}{subfolder_name}/petri_net")
-    petri_net.to_ptml(f"{output_dir}{subfolder_name}/petri_net.ptml")
+    petri_net.to_pnml(f"{output_dir}{subfolder_name}/petri_net.pnml")
 
-
-
-# TEST CASE 8: Realistic example
+# TEST CASE 7: Realistic example
 def realistic_example(output_dir: str) -> None:
     # Write Petrinet and XES file
     traces = ["AB", "ACDD", "ADDC"]
@@ -315,5 +312,5 @@ if __name__ == "__main__":
     simple_and_split(output_dir)
     loop_lenght_1(output_dir)
     loop_lenght_2(output_dir)
-    # long_dependency(output_dir)
+    long_dependency(output_dir)
     realistic_example(output_dir)

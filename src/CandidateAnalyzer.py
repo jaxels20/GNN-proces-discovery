@@ -32,18 +32,11 @@ class CandidateAnalyzer:
         candidate_pn = PetriNet.from_graph(graph)
         if add_silent_transitions:
             candidate_pn.add_silent_transitions(eventlog)
-        # candidate_pn_pm4py, _, _ = candidate_pn.to_pm4py()
-        # candidate_pn_pm4py, _, _ = apply_fsp_rule(candidate_pn_pm4py)
-        # candidate_pn_reduced = PetriNet.from_pm4py(candidate_pn_pm4py)
         
         if export_nets and id is not None:
-            true_petrinet.visualize(os.path.join(self.output_dir, f"{id}_true_petrinet"))
-            # true_petrinet, _, _ = true_petrinet.to_pm4py()
-            # true_petrinet, _, _ = apply_fsp_rule(pm4py_net)
-            # true_petrinet_reduced = PetriNet.from_pm4py(pm4py_net)
-            # true_petrinet_reduced.visualize(os.path.join(self.output_dir, f"{id}_reduced_true_petrinet"))    
+            true_petrinet.visualize(os.path.join(self.output_dir, f"{id}_true_petrinet")) 
             candidate_pn.visualize(os.path.join(self.output_dir, f"{id}_candidate_petrinet"))
-             
+        
         tp, fp, fn = compare_discovered_pn_to_true_pn(candidate_pn, true_petrinet)
         return tp, fp, fn
     
@@ -57,9 +50,9 @@ class CandidateAnalyzer:
     def evaluate_on_controlled_scenarios(self, add_silent_transitions: bool = False):
         # Make sure the output directory exists
         os.makedirs(self.output_dir, exist_ok=True)
-        
-
+    
         # Filter out files, keep only directories
+        dataset_dirs = os.listdir(self.input_dir)     
         dataset_dirs = [x for x in dataset_dirs if not os.path.isfile(os.path.join(self.input_dir, x))]
         
         eventlogs = {}  # name: eventlog
@@ -88,8 +81,9 @@ class CandidateAnalyzer:
         results = []
                 
         for id, eventlog in eventlogs.items():
+            print(f"Evaluating {id}")
             petrinet = petrinets[id]
-            tp, fp, fn = self.evaluate_candidate_places(eventlog, petrinet, export_nets=True, id=id)
+            tp, fp, fn = self.evaluate_candidate_places(eventlog, petrinet, add_silent_transitions, export_nets=True, id=id)
             precision = tp / (tp + fp)
             recall = tp / (tp + fn)
             
